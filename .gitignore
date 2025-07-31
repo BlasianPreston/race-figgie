@@ -1,0 +1,6 @@
+_build/
+_opam/
+bin/main.bc.js
+bin/*.exe
+bin/*.bc.js
+bin/main.exe

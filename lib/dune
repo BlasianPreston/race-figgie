@@ -1,0 +1,3 @@
+(library
+ (name race_figgie)
+ (libraries core))
