@@ -160,30 +160,40 @@ let submit_button ~player_id ~on_submit : Vdom.Node.t =
 ;;
 
 (* Bonsai component *)
-let dummy_orders : Game_state.Order.t list =
-  [ Game_state.Order.create ~player_id:"p1" ~racer:Red ~price:(Some 10) ~order_type:Bid
-  ; Game_state.Order.create ~player_id:"p1" ~racer:Blue ~price:(Some 15) ~order_type:Ask
-  ]
+
+let clickies : Vdom.Node.t =
+  (* This won't run until scheduled...
+     But it will run every time it is scheduled! *)
+  let greet_effect = Effect.print_s (String.sexp_of_t "hello there!") in
+  Vdom.Node.div
+    [ Vdom.Node.button
+        ~attrs:[ Vdom.Attr.on_click (fun (_evt) -> greet_effect) ]
+        [ Vdom.Node.text "click me!" ]
+    ; Vdom.Node.button
+        ~attrs:[ Vdom.Attr.on_click (fun (_evt ) -> greet_effect) ]
+        [ Vdom.Node.text "or me!" ]
+    ]
+;;
 
 let component ~player_id =
-  let submitted_orders = dummy_orders in
   Vdom.Node.div
     [ Vdom.Node.form
         ~attrs:[ Vdom.Attr.classes [ "exchange_page" ] ]
-        [ red_orders
+        [ 
+           clickies
+        ;  red_orders
         ; yellow_orders
         ; blue_orders
         ; green_orders
         ; submit_button ~player_id ~on_submit:(fun _ ->
   (* process orders, update state, then: *)
-  Ui_effect.Ignore
-)
+  Ui_effect.Ignore)
+  
         ]
-    ; Vdom.Node.h3 [ Vdom.Node.text "Submitted Orders" ]
-    ; Vdom.Node.ul
-        (List.map submitted_orders ~f:(fun order ->
-           Vdom.Node.li [ Vdom.Node.text (Sexp.to_string_hum [%sexp (order : Game_state.Order.t)]) ]))
     ]
 
-let serve_body ~player_id = component ~player_id
+
+
+let serve_body ~player_id = 
+  component ~player_id
 
