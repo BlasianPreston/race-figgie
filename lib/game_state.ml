@@ -67,7 +67,7 @@ module Order = struct
     ; racer : Racer.t
     ; price : int option
     ; order_type : order_type
-    }
+    } [@@deriving equal, compare, hash, sexp]
 
   let create ~player_id ~racer ~(price : int option) ~order_type =
     { player_id; racer; price; order_type }

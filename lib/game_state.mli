@@ -7,7 +7,7 @@ module Racer : sig
     | Yellow
     | Blue
     | Green
-  [@@deriving equal, compare, hash, sexp_of]
+  [@@deriving equal, compare, hash, sexp_of, sexp]
 
   val to_string : t -> string
   val of_string : string -> t
@@ -31,7 +31,7 @@ module Order : sig
     ; racer : Racer.t
     ; price : int option
     ; order_type : order_type
-    }
+    } [@@deriving equal, compare, hash, sexp]
 
   val create
     :  player_id:string
