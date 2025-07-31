@@ -52,6 +52,7 @@ module Player = struct
     ; holdings : Racer.t list
     ; cash : int
     }
+    [@@deriving compare, hash, sexp_of]
 
   let create name = { id = name; holdings = []; cash = 400 }
   let create_with_holdings id holdings = { id; holdings; cash = 400 }
@@ -60,6 +61,7 @@ end
 type order_type =
   | Bid
   | Ask
+  [@@deriving equal, compare, hash, sexp]
 
 module Order = struct
   type t =

@@ -24,6 +24,7 @@ type velocity = int
 type order_type =
   | Bid
   | Ask
+  [@@deriving equal, compare, hash, sexp]
 
 module Order : sig
   type t =

@@ -160,18 +160,13 @@ let submit_button ~player_id ~on_submit : Vdom.Node.t =
 ;;
 
 (* Bonsai component *)
+let dummy_orders : Game_state.Order.t list =
+  [ Game_state.Order.create ~player_id:"p1" ~racer:Red ~price:(Some 10) ~order_type:Bid
+  ; Game_state.Order.create ~player_id:"p1" ~racer:Blue ~price:(Some 15) ~order_type:Ask
+  ]
 
 let component ~player_id =
-  let%sub submitted_orders, set_submitted_orders =
-    Bonsai.state
-      ~sexp_of_model:[%sexp_of: Game_state.Order.t list]
-      ~equal:[%equal: Game_state.Order.t list]
-      []
-  in
-
-  let%arr submitted_orders = submitted_orders
-  and set_submitted_orders = set_submitted_orders in
-
+  let submitted_orders = dummy_orders in
   Vdom.Node.div
     [ Vdom.Node.form
         ~attrs:[ Vdom.Attr.classes [ "exchange_page" ] ]
@@ -179,13 +174,16 @@ let component ~player_id =
         ; yellow_orders
         ; blue_orders
         ; green_orders
-        ; submit_button ~player_id ~on_submit:set_submitted_orders
+        ; submit_button ~player_id ~on_submit:(fun _ ->
+  (* process orders, update state, then: *)
+  Ui_effect.Ignore
+)
         ]
     ; Vdom.Node.h3 [ Vdom.Node.text "Submitted Orders" ]
     ; Vdom.Node.ul
         (List.map submitted_orders ~f:(fun order ->
            Vdom.Node.li [ Vdom.Node.text (Sexp.to_string_hum [%sexp (order : Game_state.Order.t)]) ]))
     ]
-;;
 
 let serve_body ~player_id = component ~player_id
+
