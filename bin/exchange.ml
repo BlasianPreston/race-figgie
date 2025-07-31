@@ -8,7 +8,21 @@ open! Race_figgie
 
 (* Prebuilt nodes *)
 
-let red_orders : Vdom.Node.t =
+module Orders = struct
+  type t =
+    { red_bid : int option
+    ; red_ask : int option
+    ; yellow_bid : int option
+    ; yellow_ask : int option
+    ; blue_bid : int option
+    ; blue_ask : int option
+    ; green_bid : int option
+    ; green_ask : int option
+    }
+  [@@deriving fields]
+end
+
+let red_orders =
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "red" ] ]
     [ Vdom.Node.img
@@ -114,7 +128,9 @@ let green_orders : Vdom.Node.t =
 
 (* Helpers *)
 
-let get_input_value_by_class (class_name : string) (index : int) : string option =
+let get_input_value_by_class (class_name : string) (index : int)
+  : string option
+  =
   let open Js_of_ocaml in
   let open Js in
   let doc = Dom_html.document in
@@ -127,15 +143,19 @@ let get_input_value_by_class (class_name : string) (index : int) : string option
      | Some input -> Some (to_string input##.value))
 ;;
 
-let get_orders_for_racer ~player_id (racer : Game_state.Racer.t) : Game_state.Order.t list =
-  let class_name = String.lowercase (Game_state.Racer.to_string racer) ^ "_order" in
+let get_orders_for_racer ~player_id (racer : Game_state.Racer.t)
+  : Game_state.Order.t list
+  =
+  let class_name =
+    String.lowercase (Game_state.Racer.to_string racer) ^ "_order"
+  in
   let bid_str = get_input_value_by_class class_name 0 in
   let ask_str = get_input_value_by_class class_name 1 in
   let parse_price s = Option.bind s ~f:Int.of_string_opt in
   let bid_price = parse_price bid_str in
   let ask_price = parse_price ask_str in
   let make_order order_type price =
-  Game_state.Order.create ~player_id ~racer ~price:(Some price) ~order_type 
+    Game_state.Order.create ~player_id ~racer ~price:(Some price) ~order_type
   in
   List.filter_map
     [ Option.map bid_price ~f:(make_order Bid)
@@ -161,39 +181,19 @@ let submit_button ~player_id ~on_submit : Vdom.Node.t =
 
 (* Bonsai component *)
 
-let clickies : Vdom.Node.t =
-  (* This won't run until scheduled...
-     But it will run every time it is scheduled! *)
-  let greet_effect = Effect.print_s (String.sexp_of_t "hello there!") in
-  Vdom.Node.div
-    [ Vdom.Node.button
-        ~attrs:[ Vdom.Attr.on_click (fun (_evt) -> greet_effect) ]
-        [ Vdom.Node.text "click me!" ]
-    ; Vdom.Node.button
-        ~attrs:[ Vdom.Attr.on_click (fun (_evt ) -> greet_effect) ]
-        [ Vdom.Node.text "or me!" ]
-    ]
-;;
-
 let component ~player_id =
   Vdom.Node.div
     [ Vdom.Node.form
         ~attrs:[ Vdom.Attr.classes [ "exchange_page" ] ]
-        [ 
-           clickies
-        ;  red_orders
+        [ red_orders
         ; yellow_orders
         ; blue_orders
         ; green_orders
         ; submit_button ~player_id ~on_submit:(fun _ ->
-  (* process orders, update state, then: *)
-  Ui_effect.Ignore)
-  
+            (* process orders, update state, then: *)
+            Ui_effect.Ignore)
         ]
     ]
+;;
 
-
-
-let serve_body ~player_id = 
-  component ~player_id
-
+let serve_body ~player_id = component ~player_id

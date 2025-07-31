@@ -106,6 +106,7 @@ let update_state_on_trade
     :: state.filled_orders
   in
   Game_state.State.update
+  ~current_state:state.current_state
     ~players:updated_players
     ~bids:updated_bids
     ~asks:updated_asks

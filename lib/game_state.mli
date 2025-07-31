@@ -24,7 +24,7 @@ type velocity = int
 type order_type =
   | Bid
   | Ask
-  [@@deriving equal, compare, hash, sexp]
+[@@deriving equal, compare, hash, sexp]
 
 module Order : sig
   type t =
@@ -32,7 +32,8 @@ module Order : sig
     ; racer : Racer.t
     ; price : int option
     ; order_type : order_type
-    } [@@deriving equal, compare, hash, sexp]
+    }
+  [@@deriving equal, compare, hash, sexp]
 
   val create
     :  player_id:string
@@ -75,8 +76,14 @@ module Player : sig
 end
 
 module State : sig
+  type current_state =
+    | Waiting
+    | Playing
+    | End
+
   type t =
-    { players : Player.t String.Map.t
+    { current_state : current_state
+    ; players : Player.t String.Map.t
     ; bids : Order.t list Racer.Map.t
     ; asks : Order.t list Racer.Map.t
     ; filled_orders : Fill.t list
@@ -85,7 +92,8 @@ module State : sig
     }
 
   val create
-    :  players:Player.t String.Map.t
+    :  current_state:current_state
+    -> players:Player.t String.Map.t
     -> bids:Order.t list Racer.Map.t
     -> asks:Order.t list Racer.Map.t
     -> filled_orders:Fill.t list
@@ -94,7 +102,8 @@ module State : sig
     -> t
 
   val update
-    :  players:Player.t String.Map.t
+    :  current_state:current_state
+    -> players:Player.t String.Map.t
     -> bids:Order.t list Racer.Map.t
     -> asks:Order.t list Racer.Map.t
     -> filled_orders:Fill.t list

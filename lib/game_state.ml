@@ -52,7 +52,7 @@ module Player = struct
     ; holdings : Racer.t list
     ; cash : int
     }
-    [@@deriving compare, hash, sexp_of]
+  [@@deriving compare, hash, sexp_of]
 
   let create name = { id = name; holdings = []; cash = 400 }
   let create_with_holdings id holdings = { id; holdings; cash = 400 }
@@ -61,7 +61,7 @@ end
 type order_type =
   | Bid
   | Ask
-  [@@deriving equal, compare, hash, sexp]
+[@@deriving equal, compare, hash, sexp]
 
 module Order = struct
   type t =
@@ -69,7 +69,8 @@ module Order = struct
     ; racer : Racer.t
     ; price : int option
     ; order_type : order_type
-    } [@@deriving equal, compare, hash, sexp]
+    }
+  [@@deriving equal, compare, hash, sexp]
 
   let create ~player_id ~racer ~(price : int option) ~order_type =
     { player_id; racer; price; order_type }
@@ -99,8 +100,14 @@ end
 module State = struct
   include Map.Make (Racer)
 
+  type current_state =
+    | Waiting
+    | Playing
+    | End
+
   type t =
-    { players : Player.t String.Map.t
+    { current_state : current_state
+    ; players : Player.t String.Map.t
     ; bids : Order.t list Racer.Map.t
     ; asks : Order.t list Racer.Map.t
     ; filled_orders : Fill.t list
@@ -109,7 +116,8 @@ module State = struct
     }
 
   let empty () =
-    { players = String.Map.empty
+    { current_state = Waiting
+    ; players = String.Map.empty
     ; bids = Racer.Map.empty
     ; asks = Racer.Map.empty
     ; filled_orders = []
@@ -172,7 +180,8 @@ module State = struct
            player_lst
            groups)
     in
-    { players = players_with_cards
+    { current_state = t.current_state
+    ; players = players_with_cards
     ; bids = t.bids
     ; asks = t.asks
     ; filled_orders = t.filled_orders
@@ -181,15 +190,45 @@ module State = struct
     }
   ;;
 
-  let create ~players ~bids ~asks ~filled_orders ~race_positions ~winner =
+  let create
+    ~current_state
+    ~players
+    ~bids
+    ~asks
+    ~filled_orders
+    ~race_positions
+    ~winner
+    =
     let state =
-      { players; bids; asks; filled_orders; race_positions; winner }
+      { current_state
+      ; players
+      ; bids
+      ; asks
+      ; filled_orders
+      ; race_positions
+      ; winner
+      }
     in
     add_hands_to_players state
   ;;
 
-  let update ~players ~bids ~asks ~filled_orders ~race_positions ~winner =
-    { players; bids; asks; filled_orders; race_positions; winner }
+  let update
+    ~current_state
+    ~players
+    ~bids
+    ~asks
+    ~filled_orders
+    ~race_positions
+    ~winner
+    =
+    { current_state
+    ; players
+    ; bids
+    ; asks
+    ; filled_orders
+    ; race_positions
+    ; winner
+    }
   ;;
 
   let set_winner state winner = { state with winner }
@@ -205,7 +244,8 @@ module State = struct
             else racer, position + velocity, velocity)
         positions
     in
-    { players = t.players
+    { current_state = t.current_state
+    ; players = t.players
     ; bids = t.bids
     ; asks = t.asks
     ; filled_orders = t.filled_orders
@@ -227,7 +267,8 @@ module State = struct
             racer, position, new_velocity)
         positions
     in
-    { players = t.players
+    { current_state = t.current_state
+    ; players = t.players
     ; bids = t.bids
     ; asks = t.asks
     ; filled_orders = t.filled_orders

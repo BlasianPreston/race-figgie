@@ -77,6 +77,7 @@ let () =
   in
   let initial_state =
     State.create
+    ~current_state:Waiting
       ~players
       ~bids
       ~asks
