@@ -1,5 +1,5 @@
 (library
  (name race_figgie)
- (libraries core)
+ (libraries core async_rpc_kernel async_kernel polling_state_rpc)
  (preprocess
   (pps ppx_jane)))

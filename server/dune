@@ -1,0 +1,5 @@
+(library
+ (name server)
+ (libraries async_rpc_websocket race_figgie async core cohttp_static_handler)
+ (preprocess
+  (pps ppx_jane)))

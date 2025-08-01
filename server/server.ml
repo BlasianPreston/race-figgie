@@ -1,5 +1,6 @@
 open! Core
 open Async
+open Race_figgie
 
 let handle_client_requesting_client_state
   (query : Rpcs.Poll_client_state.Query.t)
@@ -13,69 +14,191 @@ let sleep (seconds : int) =
   return ()
 ;;
 
-let change_game_phase
-  (authoritative_game_state : Game_state.t ref)
-  (phase : Game_phase.t)
-  =
-  authoritative_game_state
-  := { !authoritative_game_state with
-       current_phase = phase
-     ; round_start = Time_ns.now ()
-     }
+let change_game_phase (game_state : Game_state.t ref) (phase : Current_phase.t) =
+  game_state := { !game_state with current_phase = phase }
 ;;
 
-let reset (authoritative_game_state : Game_state.t ref) =
+let reset (game_state : Game_state.t ref) =
   let new_player_map =
-    Map.map !authoritative_game_state.players ~f:(fun player ->
-      Player.new_player player.name)
+    Map.map !game_state.players ~f:(fun player ->
+      Player.create player.name)
   in
-  authoritative_game_state
+  game_state
   := { (Game_state.create_empty_game ()) with players = new_player_map };
   return ()
 ;;
 
-let phase
-  (authoritative_game_state : Game_state.t ref)
-  (phase_to_change_to : Game_phase.t)
+let phase (game_state : Game_state.t ref) (phase_to_change_to : Game_phase.t)
   =
-  change_game_phase authoritative_game_state phase_to_change_to;
+  change_game_phase game_state phase_to_change_to;
   let%bind () = sleep (Game_phase.to_duration phase_to_change_to) in
   return ()
 ;;
 
-let update_player_item_choices_and_round
-  (authoritative_game_state : Game_state.t ref)
-  (new_round : int)
-  =
-  let players_with_item_blockers_used_on =
-    List.filter_map
-      !authoritative_game_state.actions_taken_in_round
-      ~f:(fun (action : Action.t) ->
-        match action.item_used with
-        | Item_blocker -> Some action.recipient
-        | Observer | Medical_kit _ | Poisonous_dart _ | Pocket_knife _
-        | Gamblers_potion _ ->
-          None)
+let remove_one_racer_from_list list racer =
+  let rec aux acc = function
+    | [] -> List.rev acc
+    | h :: t ->
+      if Game_state.Racer.equal h racer
+      then List.rev_append acc t
+      else aux (h :: acc) t
   in
-  let new_item_choices =
-    Map.mapi
-      !authoritative_game_state.players
-      ~f:(fun ~key ~data ->
-        let player_name = key in 
-        ignore data;
-        if List.mem players_with_item_blockers_used_on player_name ~equal:String.equal
-        then None
-        else Some (Item.get_two_random_items_no_duplicates ()))
-  in
-  authoritative_game_state
-  := { !authoritative_game_state with
-       item_choices_by_user = new_item_choices
-     ; actions_taken_in_round = []
-     ; current_round = new_round
-     }
+  aux [] list
 ;;
 
-let compute_round_results (authoritative_game_state : Game_state.t ref) =
+let get_best_bid_order ~(bid_order_list : Game_state.Order.t list) =
+  List.filter_map bid_order_list ~f:(fun { player_id; price; _ } ->
+    Option.map price ~f:(fun p -> p, player_id))
+  |> List.max_elt ~compare:(fun (p1, _) (p2, _) -> Int.compare p1 p2)
+;;
+
+let get_best_ask_order ~(ask_order_list : Game_state.Order.t list) =
+  List.filter_map ask_order_list ~f:(fun { player_id; price; _ } ->
+    Option.map price ~f:(fun p -> p, player_id))
+  |> List.min_elt ~compare:(fun (p1, _) (p2, _) -> Int.compare p1 p2)
+;;
+
+let rec remove_player_order_from_order_list
+  ~player
+  ~(order_list : Game_state.Order.t list)
+  =
+  match order_list with
+  | [] -> []
+  | current_order :: rest ->
+    (match String.equal current_order.player_id player with
+     | true -> remove_player_order_from_order_list ~player ~order_list:rest
+     | false ->
+       [ current_order ]
+       @ remove_player_order_from_order_list ~player ~order_list:rest)
+;;
+
+let update_state_on_trade
+  (state : Game_state.State.t)
+  ~bidder
+  ~trade_price
+  ~bid
+  ~asker
+  ~ask_order_list
+  ~bid_order_list
+  ~(racer_traded : Game_state.Racer.t)
+  =
+  let updated_bid_order_list =
+    remove_player_order_from_order_list
+      ~player:bidder
+      ~order_list:bid_order_list
+  in
+  let updated_ask_order_list =
+    remove_player_order_from_order_list
+      ~player:asker
+      ~order_list:ask_order_list
+  in
+  let players_lst = Map.to_alist state.players in
+  let askers_player_record =
+    List.find_exn players_lst ~f:(fun (_, player) ->
+      String.equal player.id asker)
+  in
+  let _, askers_player = askers_player_record in
+  let updated_asker =
+    { askers_player with
+      cash = askers_player.cash + trade_price
+    ; holdings =
+        remove_one_racer_from_list askers_player.holdings racer_traded
+    }
+  in
+  let players_lst = Map.to_alist state.players in
+  let bidders_player_record =
+    List.find_exn players_lst ~f:(fun (_, player) ->
+      String.equal player.id asker)
+  in
+  let _, bidders_player = bidders_player_record in
+  let updated_bidder =
+    { bidders_player with
+      cash = bidders_player.cash + (bid - trade_price)
+    ; holdings = racer_traded :: bidders_player.holdings
+    }
+  in
+  let updated_players =
+    let players_lst = Map.to_alist state.players in
+    Map.of_alist_exn
+      (module String)
+      (List.map players_lst ~f:(fun (name, p) ->
+         if String.equal p.id asker
+         then asker, updated_asker
+         else if String.equal p.id bidder
+         then bidder, updated_bidder
+         else name, p))
+  in
+  (* Update the bids map *)
+  let updated_bids =
+    Map.add_exn ~key:racer_traded ~data:updated_bid_order_list state.bids
+  in
+  (* Update the asks map *)
+  let updated_asks =
+    Map.add_exn ~key:racer_traded ~data:updated_ask_order_list state.asks
+  in
+  let updated_fills =
+    Game_state.Fill.create bidder asker racer_traded trade_price
+    :: state.filled_orders
+  in
+  Game_state.State.update
+  ~current_state:state.current_state
+    ~players:updated_players
+    ~bids:updated_bids
+    ~asks:updated_asks
+    ~filled_orders:updated_fills
+    ~race_positions:state.race_positions
+    ~winner:state.winner
+;;
+
+let check_for_trades_given_racer
+  (state : Game_state.State.t)
+  ~(racer : Game_state.Racer.t)
+  =
+  let bids = state.bids in
+  let asks = state.asks in
+  let racer_bids = Map.find bids racer in
+  let racer_asks = Map.find asks racer in
+  match racer_bids, racer_asks with
+  | None, _ | _, None -> state
+  | Some bid_order_list, Some ask_order_list ->
+    (match
+       get_best_bid_order ~bid_order_list, get_best_ask_order ~ask_order_list
+     with
+     | None, _ | _, None -> state
+     | Some (best_bid, bidder), Some (best_ask, asker) ->
+       (match best_bid >= best_ask with
+        | false -> state
+        | true ->
+          update_state_on_trade
+            state
+            ~bidder
+            ~trade_price:best_ask
+            ~bid:best_bid
+            ~asker
+            ~ask_order_list
+            ~bid_order_list
+            ~racer_traded:racer))
+;;
+
+let match_orders (state : Game_state.State.t) =
+  (* Match highest bid with lowest ask if bid >= ask *)
+  (* Update players' holdings and cash accordingly *)
+  check_for_trades_given_racer state ~racer:Red
+  |> check_for_trades_given_racer ~racer:Green
+  |> check_for_trades_given_racer ~racer:Yellow
+  |> check_for_trades_given_racer ~racer:Blue
+;;
+
+let check_winner (game_state : Game_state.State.t ref) =
+  let state = !game_state in
+  let racers = state.race_positions in
+  let winning_racer = List.filter racers ~f:(fun (_, _, distance) -> if distance >= 500 then true else false) in
+  match List.is_empty winning_racer with
+  | true -> ()
+  | false -> match List.hd_exn winning_racer with
+  | racer, _, _ -> game_state := (Game_state.State.set_winner state (Some racer)) 
+
+let compute_round_results (authoritative_game_state : Game_state.State.t ref) =
   authoritative_game_state
   := Game_state.apply_actions_taken !authoritative_game_state
      |> Game_state.compile_all_elimination_results

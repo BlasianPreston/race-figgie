@@ -143,11 +143,11 @@ let get_input_value_by_class (class_name : string) (index : int)
      | Some input -> Some (to_string input##.value))
 ;;
 
-let get_orders_for_racer ~player_id (racer : Game_state.Racer.t)
-  : Game_state.Order.t list
+let get_orders_for_racer ~player_id (racer : Racer.t)
+  : Order.t list
   =
   let class_name =
-    String.lowercase (Game_state.Racer.to_string racer) ^ "_order"
+    String.lowercase (Racer.to_string racer) ^ "_order"
   in
   let bid_str = get_input_value_by_class class_name 0 in
   let ask_str = get_input_value_by_class class_name 1 in
@@ -155,7 +155,7 @@ let get_orders_for_racer ~player_id (racer : Game_state.Racer.t)
   let bid_price = parse_price bid_str in
   let ask_price = parse_price ask_str in
   let make_order order_type price =
-    Game_state.Order.create ~player_id ~racer ~price:(Some price) ~order_type
+    Order.create ~player_id ~racer ~price:(Some price) ~order_type
   in
   List.filter_map
     [ Option.map bid_price ~f:(make_order Bid)
@@ -170,7 +170,7 @@ let submit_button ~player_id ~on_submit : Vdom.Node.t =
       [ Vdom.Attr.type_ "button"
       ; Vdom.Attr.classes [ "submit_orders" ]
       ; Vdom.Attr.on_click (fun _evt ->
-          let racers = [ Game_state.Racer.Red; Yellow; Blue; Green ] in
+          let racers = [ Racer.Red; Yellow; Blue; Green ] in
           let all_orders =
             List.concat_map racers ~f:(get_orders_for_racer ~player_id)
           in

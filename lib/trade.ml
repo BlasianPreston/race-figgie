@@ -4,20 +4,20 @@ let remove_one_racer_from_list list racer =
   let rec aux acc = function
     | [] -> List.rev acc
     | h :: t ->
-      if Game_state.Racer.equal h racer
+      if Racer.equal h racer
       then List.rev_append acc t
       else aux (h :: acc) t
   in
   aux [] list
 ;;
 
-let get_best_bid_order ~(bid_order_list : Game_state.Order.t list) =
+let get_best_bid_order ~(bid_order_list : Order.t list) =
   List.filter_map bid_order_list ~f:(fun { player_id; price; _ } ->
     Option.map price ~f:(fun p -> p, player_id))
   |> List.max_elt ~compare:(fun (p1, _) (p2, _) -> Int.compare p1 p2)
 ;;
 
-let get_best_ask_order ~(ask_order_list : Game_state.Order.t list) =
+let get_best_ask_order ~(ask_order_list : Order.t list) =
   List.filter_map ask_order_list ~f:(fun { player_id; price; _ } ->
     Option.map price ~f:(fun p -> p, player_id))
   |> List.min_elt ~compare:(fun (p1, _) (p2, _) -> Int.compare p1 p2)
@@ -25,7 +25,7 @@ let get_best_ask_order ~(ask_order_list : Game_state.Order.t list) =
 
 let rec remove_player_order_from_order_list
   ~player
-  ~(order_list : Game_state.Order.t list)
+  ~(order_list : Order.t list)
   =
   match order_list with
   | [] -> []
@@ -38,14 +38,14 @@ let rec remove_player_order_from_order_list
 ;;
 
 let update_state_on_trade
-  (state : Game_state.State.t)
+  (state : Game_state.t)
   ~bidder
   ~trade_price
   ~bid
   ~asker
   ~ask_order_list
   ~bid_order_list
-  ~(racer_traded : Game_state.Racer.t)
+  ~(racer_traded : Racer.t)
   =
   let updated_bid_order_list =
     remove_player_order_from_order_list
@@ -102,11 +102,11 @@ let update_state_on_trade
     Map.add_exn ~key:racer_traded ~data:updated_ask_order_list state.asks
   in
   let updated_fills =
-    Game_state.Fill.create bidder asker racer_traded trade_price
+    Fill.create bidder asker racer_traded trade_price
     :: state.filled_orders
   in
-  Game_state.State.update
-  ~current_state:state.current_state
+  Game_state.update
+  ~current_phase:state.current_phase
     ~players:updated_players
     ~bids:updated_bids
     ~asks:updated_asks
@@ -116,8 +116,8 @@ let update_state_on_trade
 ;;
 
 let check_for_trades_given_racer
-  (state : Game_state.State.t)
-  ~(racer : Game_state.Racer.t)
+  (state : Game_state.t)
+  ~(racer : Racer.t)
   =
   let bids = state.bids in
   let asks = state.asks in
@@ -145,7 +145,7 @@ let check_for_trades_given_racer
             ~racer_traded:racer))
 ;;
 
-let match_orders (state : Game_state.State.t) =
+let match_orders (state : Game_state.t) =
   (* Match highest bid with lowest ask if bid >= ask *)
   (* Update players' holdings and cash accordingly *)
   check_for_trades_given_racer state ~racer:Red

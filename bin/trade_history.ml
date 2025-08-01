@@ -24,7 +24,7 @@ let legend () =
     ]
 ;;
 
-let orders (filled_orders : Game_state.Fill.t list) =
+let orders (filled_orders : Fill.t list) =
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "trades" ] ]
     (List.concat_map filled_orders ~f:(fun fill ->
@@ -34,7 +34,7 @@ let orders (filled_orders : Game_state.Fill.t list) =
        ; Vdom.Node.h3
            [ Vdom.Node.img
                ~attrs:
-                 [ Vdom.Attr.src (Game_state.Racer.to_img fill.racer)
+                 [ Vdom.Attr.src (Racer.to_img fill.racer)
                  ; Vdom.Attr.classes [ "trade_img" ]
                  ]
                ()
@@ -48,7 +48,7 @@ let body () =
     [ banner ()
     ; legend ()
     ; orders
-        [ Game_state.Fill.create "Preston" "Joseph" Game_state.Racer.Blue 10
+        [ Fill.create "Preston" "Joseph" Racer.Blue 10
         ]
     ]
 ;;
