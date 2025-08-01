@@ -21,14 +21,14 @@ let change_game_phase (game_state : Game_state.t ref) (phase : Current_phase.t) 
 let reset (game_state : Game_state.t ref) =
   let new_player_map =
     Map.map !game_state.players ~f:(fun player ->
-      Player.create player.name)
+      Player.create player.id)
   in
   game_state
-  := { (Game_state.create_empty_game ()) with players = new_player_map };
+  := { (Game_state.empty ()) with players = new_player_map };
   return ()
 ;;
 
-let phase (game_state : Game_state.t ref) (phase_to_change_to : Game_phase.t)
+let phase (game_state : Game_state.t ref) (phase_to_change_to : Current_phase.t)
   =
   change_game_phase game_state phase_to_change_to;
   let%bind () = sleep (Game_phase.to_duration phase_to_change_to) in
