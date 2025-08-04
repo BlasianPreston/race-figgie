@@ -60,7 +60,113 @@ let get_client_state_from_name (t : t) (name : string) : Client_state.t =
         then true
         else false)
   in
-  { current_phase; all_trades; players; ready_players; me; shown_racers }
+  let red_bids = Map.find t.bids Racer.Red |> Option.value ~default:[] in
+  let my_red_bid_lst =
+    List.filter red_bids ~f:(fun bid ->
+      if String.equal bid.player_id name then true else false)
+  in
+  let my_red_bid =
+    if List.is_empty my_red_bid_lst
+    then None
+    else (List.hd_exn my_red_bid_lst).price
+  in
+  let yellow_bids =
+    Map.find t.bids Racer.Yellow |> Option.value ~default:[]
+  in
+  let my_yellow_bid_lst =
+    List.filter yellow_bids ~f:(fun bid ->
+      if String.equal bid.player_id name then true else false)
+  in
+  let my_yellow_bid =
+    if List.is_empty my_yellow_bid_lst
+    then None
+    else (List.hd_exn my_yellow_bid_lst).price
+  in
+  let blue_bids = Map.find t.bids Racer.Blue |> Option.value ~default:[] in
+  let my_blue_bid_lst =
+    List.filter blue_bids ~f:(fun bid ->
+      if String.equal bid.player_id name then true else false)
+  in
+  let my_blue_bid =
+    if List.is_empty my_blue_bid_lst
+    then None
+    else (List.hd_exn my_blue_bid_lst).price
+  in
+  let green_bids = Map.find t.bids Racer.Green |> Option.value ~default:[] in
+  let my_green_bid_lst =
+    List.filter green_bids ~f:(fun bid ->
+      if String.equal bid.player_id name then true else false)
+  in
+  let my_green_bid =
+    if List.is_empty my_green_bid_lst
+    then None
+    else (List.hd_exn my_green_bid_lst).price
+  in
+  let red_asks = Map.find t.asks Racer.Red |> Option.value ~default:[] in
+  let my_red_ask_lst =
+    List.filter red_asks ~f:(fun ask ->
+      if String.equal ask.player_id name then true else false)
+  in
+  let my_red_ask =
+    if List.is_empty my_red_ask_lst
+    then None
+    else (List.hd_exn my_red_ask_lst).price
+  in
+  let yellow_ask =
+    Map.find t.asks Racer.Yellow |> Option.value ~default:[]
+  in
+  let my_yellow_ask_lst =
+    List.filter yellow_ask ~f:(fun ask ->
+      if String.equal ask.player_id name then true else false)
+  in
+  let my_yellow_ask =
+    if List.is_empty my_yellow_ask_lst
+    then None
+    else (List.hd_exn my_yellow_ask_lst).price
+  in
+  let blue_ask = Map.find t.asks Racer.Blue |> Option.value ~default:[] in
+  let my_blue_ask_lst =
+    List.filter blue_ask ~f:(fun ask ->
+      if String.equal ask.player_id name then true else false)
+  in
+  let my_blue_ask =
+    if List.is_empty my_blue_ask_lst
+    then None
+    else (List.hd_exn my_blue_ask_lst).price
+  in
+  let green_ask = Map.find t.bids Racer.Green |> Option.value ~default:[] in
+  let my_green_ask_lst =
+    List.filter green_ask ~f:(fun ask ->
+      if String.equal ask.player_id name then true else false)
+  in
+  let my_green_ask =
+    if List.is_empty my_green_ask_lst
+    then None
+    else (List.hd_exn my_green_ask_lst).price
+  in
+  { current_phase
+  ; all_trades
+  ; players
+  ; ready_players
+  ; me
+  ; shown_racers
+  ; my_red_bid
+  ; my_red_ask
+  ; my_yellow_bid
+  ; my_yellow_ask
+  ; my_blue_bid
+  ; my_blue_ask
+  ; my_green_bid
+  ; my_green_ask
+  }
+;;
+
+let take_money_for_pot t =
+  let updated_players =
+    Map.map t.players ~f:(fun player ->
+      { player with cash = player.cash - 50 })
+  in
+  { t with players = updated_players }
 ;;
 
 let add_order t (order : Order.t) =
@@ -173,6 +279,12 @@ let add_player_and_possibly_add_hand t name =
   then add_hands_to_players new_state
   else new_state
 ;;
+
+let reset_hands t =
+  let players = t.players in
+  let all_players = Map.data players in
+  let players_assc_lst = List.map all_players ~f:(fun player -> (player.id, {player with holdings = []})) in
+  {t with players = (String.Map.of_alist_exn players_assc_lst)}
 
 let create
   ~current_phase

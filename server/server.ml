@@ -191,43 +191,31 @@ let _check_winner (game_state : Game_state.t ref) =
      | racer, _, _ -> game_state := Game_state.set_winner state (Some racer))
 ;;
 
-(* let rec handle_round
-  (authoritative_game_state : Game_state.t ref)
-  ~(round : int)
-  : unit Deferred.t
-  =
-  update_player_item_choices_and_round authoritative_game_state round;
-  let%bind () = phase authoritative_game_state Item_selection in
-  let%bind () = phase authoritative_game_state Negotiation in
-  let%bind () = phase authoritative_game_state Item_usage in
-  compute_round_results authoritative_game_state;
-  let%bind () = phase authoritative_game_state Round_results in
-  let players_left = Game_state.players_left !authoritative_game_state in
-  if players_left > 0 && round < 10
-  then handle_round authoritative_game_state ~round:(round + 1)
-  else (
-    let%bind () = phase authoritative_game_state Game_results in
-    reset authoritative_game_state)
-;; *)
-
 let _everyone_is_ready (game_state : Game_state.t ref) =
   Map.length !game_state.players = 4
 ;;
 
-let _start_game (authoritative_game_state : Game_state.t ref) =
-  change_game_phase authoritative_game_state Current_phase.Playing
+let start_game (game_state : Game_state.t ref) =
+  change_game_phase game_state Current_phase.Playing
+;;
+
+let take_money_for_pot (game_state : Game_state.t ref) =
+  game_state := Game_state.take_money_for_pot !game_state
 ;;
 
 let handle_new_player (game_state : Game_state.t ref) name =
-  game_state := Game_state.add_player_and_possibly_add_hand !game_state name; Ok "Ok"
+  game_state := Game_state.add_player_and_possibly_add_hand !game_state name;
+  Ok "Ok"
 ;;
 
 let handle_order_placed (game_state : Game_state.t ref) (order : Order.t) =
-  game_state := Game_state.add_order !game_state order; Ok "Ok"
+  game_state := Game_state.add_order !game_state order;
+  Ok "Ok"
 ;;
 
 let handle_order_filled (game_state : Game_state.t ref) fill =
-  game_state := Game_state.add_fill !game_state fill; Ok "Ok"
+  game_state := Game_state.add_fill !game_state fill;
+  Ok "Ok"
 ;;
 
 let handle_client_message
@@ -238,6 +226,45 @@ let handle_client_message
   | New_player name -> handle_new_player game_state name
   | Order_placed order -> handle_order_placed game_state order
   | Order_filled fill -> handle_order_filled game_state fill
+;;
+
+let wait_for_winner (game_state : Game_state.t ref) =
+  let rec loop passes =
+    match !game_state.winner with
+    | Some w -> game_state := { !game_state with winner = Some w }
+    | None ->
+      game_state := Game_state.update_positions !game_state;
+      if passes = 5
+      then (
+        game_state := Game_state.update_velocities !game_state;
+        game_state := match_orders !game_state;
+        Core_unix.sleep 1;
+        loop 1)
+      else Core_unix.sleep 1;
+      loop (passes + 1)
+  in
+  loop 1
+;;
+
+let compute_round_results (game_state : Game_state.t ref) = 
+  let players = Map.data 
+
+let rec handle_round (game_state : Game_state.t ref) ~(round : int)
+  : unit Deferred.t
+  =
+  let reset_player_hands = Game_state.reset_hands !game_state in
+  let add_hands = Game_state.add_hands_to_players reset_player_hands in
+  take_money_for_pot add_hands;
+  start_game game_state;
+  wait_for_winner game_state;
+  compute_round_results game_state;
+  let%bind () = phase game_state Round_results in
+  let players_left = Game_state.players_left !game_state in
+  if players_left > 0 && round < 10
+  then handle_round game_state ~round:(round + 1)
+  else (
+    let%bind () = phase game_state Game_results in
+    reset game_state)
 ;;
 
 let web_handler =
@@ -260,7 +287,7 @@ let web_handler =
       ]
 ;;
 
-let start_server host_and_port authoritative_game_state =
+let start_server host_and_port game_state =
   let listen_at =
     Tcp.Where_to_listen.create
       ~socket_type:Socket.Type.tcp
@@ -281,16 +308,13 @@ let start_server host_and_port authoritative_game_state =
            ~on_unknown_rpc:`Close_connection
            ~implementations:
              [ Rpc.Rpc.implement Rpcs.Client_message.rpc (fun _ query ->
-                 return
-                   (handle_client_message query authoritative_game_state))
+                 return (handle_client_message query game_state))
              ; Polling_state_rpc.implement
                  ~on_client_and_server_out_of_sync:(fun _ -> ())
                  Rpcs.Poll_client_state.rpc
                  (fun _ query ->
                    return
-                     (handle_client_requesting_client_state
-                        query
-                        authoritative_game_state))
+                     (handle_client_requesting_client_state query game_state))
              ])
       ()
   in
@@ -305,6 +329,6 @@ let start_server_command =
     (let%map_open.Command host_and_server_port =
        flag "address" (required host_and_port) ~doc:"<host>:<port>"
      in
-     let authoritative_game_state = ref (Game_state.empty ()) in
-     fun () -> start_server host_and_server_port authoritative_game_state)
+     let game_state = ref (Game_state.empty ()) in
+     fun () -> start_server host_and_server_port game_state)
 ;;

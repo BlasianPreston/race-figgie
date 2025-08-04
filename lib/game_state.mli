@@ -44,3 +44,6 @@ val initialize_racers : t -> t
 val add_player_and_possibly_add_hand : t -> string -> t
 val add_order : t -> Order.t -> t
 val add_fill : t -> Fill.t -> t
+val take_money_for_pot : t -> t
+val reset_hands : t -> t
+val add_hands_to_players : t -> t
