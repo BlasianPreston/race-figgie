@@ -2,19 +2,11 @@ open! Core
 open! Async_rpc_kernel
 
 module Client_message = struct
-  module Ready_status_change = struct
-    type t =
-      { name : string
-      ; is_ready : bool
-      }
-    [@@deriving sexp_of, bin_io]
-  end
-
-
   module Query = struct
     type t =
       | New_player of string
-      | Ready_status_change of Ready_status_change.t
+      | Order_placed of Order.t
+      | Order_filled of Fill.t
     [@@deriving sexp_of, bin_io]
   end
 
@@ -46,10 +38,16 @@ module Poll_client_state = struct
       type nonrec t = t [@@deriving sexp, bin_io, equal]
     end
 
-    let diffs ~from ~to_ = ignore from; to_
-    let update t update = ignore t; update
-  end
+    let diffs ~from ~to_ =
+      ignore from;
+      to_
+    ;;
 
+    let update t update =
+      ignore t;
+      update
+    ;;
+  end
 
   module Error = struct
     type t = string [@@deriving sexp, bin_io]

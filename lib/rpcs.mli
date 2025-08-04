@@ -2,19 +2,11 @@ open! Core
 open! Async_rpc_kernel
 
 module Client_message : sig
-  module Ready_status_change : sig
-    type t =
-      { name : string
-      ; is_ready : bool
-      }
-    [@@deriving sexp_of, bin_io]
-  end
-
-
   module Query : sig
     type t =
       | New_player of string
-      | Ready_status_change of Ready_status_change.t
+      | Order_placed of Order.t
+      | Order_filled of Fill.t
     [@@deriving sexp_of, bin_io]
   end
 

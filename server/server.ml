@@ -177,7 +177,7 @@ let match_orders (state : Game_state.t) =
   |> check_for_trades_given_racer ~racer:Blue
 ;;
 
-let check_winner (game_state : Game_state.t ref) =
+let _check_winner (game_state : Game_state.t ref) =
   let state = !game_state in
   let racers = state.race_positions in
   let winning_racer =
@@ -210,28 +210,35 @@ let check_winner (game_state : Game_state.t ref) =
     reset authoritative_game_state)
 ;; *)
 
-let everyone_is_ready (game_state : Game_state.t ref) =
+let _everyone_is_ready (game_state : Game_state.t ref) =
   Map.length !game_state.players = 4
 ;;
 
-let start_game (authoritative_game_state : Game_state.t ref) =
-  let%bind () = change_game_phase authoritative_game_state Current_phase.Playing in
-  handle_round authoritative_game_state ~round:1
+let _start_game (authoritative_game_state : Game_state.t ref) =
+  change_game_phase authoritative_game_state Current_phase.Playing
 ;;
 
-let handle_ready_players
-  (authoritative_game_state : Game_state.t ref)
-  (query : Rpcs.Client_message.Ready_status_change.t)
-  : Rpcs.Client_message.Response.t
+let handle_new_player (game_state : Game_state.t ref) name =
+  game_state := Game_state.add_player_and_possibly_add_hand !game_state name; Ok "Ok"
+;;
+
+let handle_order_placed (game_state : Game_state.t ref) (order : Order.t) =
+  game_state := Game_state.add_order !game_state order; Ok "Ok"
+;;
+
+let handle_order_filled (game_state : Game_state.t ref) fill =
+  game_state := Game_state.add_fill !game_state fill; Ok "Ok"
+;;
+
+let handle_client_message
+  (query : Rpcs.Client_message.Query.t)
+  (game_state : Game_state.t ref)
   =
-  match Game_state.name_taken !authoritative_game_state query.name with
-  | true ->
-    if everyone_is_ready authoritative_game_state
-    then start_game authoritative_game_state |> don't_wait_for;
-    Ok "OK"
-  | false -> Error "Player name isn't registered"
+  match query with
+  | New_player name -> handle_new_player game_state name
+  | Order_placed order -> handle_order_placed game_state order
+  | Order_filled fill -> handle_order_filled game_state fill
 ;;
-
 
 let web_handler =
   Cohttp_static_handler.Single_page_handler.create_handler

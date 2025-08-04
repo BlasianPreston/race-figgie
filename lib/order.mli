@@ -1,7 +1,9 @@
+open! Core
+
 type order_type =
   | Bid
   | Ask
-[@@deriving equal, compare, hash, sexp]
+[@@deriving equal, compare, hash, sexp, bin_io]
 
 type t =
   { player_id : string
@@ -9,6 +11,7 @@ type t =
   ; price : int option
   ; order_type : order_type
   }
+  [@@deriving sexp, bin_io]
 
 val create
   :  player_id:string
@@ -18,3 +21,5 @@ val create
   -> t
 
 val is_no_order : t -> bool
+
+val is_bid : t -> bool
