@@ -42,7 +42,7 @@ let dummy_client_state : Client_state.t Bonsai.t =
     ; my_red_bid = None
     ; my_yellow_bid = None
     ; my_blue_bid = None
-    ; my_green_bid = None
+    ; my_green_bid = Some 5
     ; my_red_ask = None
     ; my_yellow_ask = None
     ; my_blue_ask = None
@@ -55,18 +55,34 @@ let page
   (client_state : Client_state.t Bonsai.t)
   (local_ _graph)
   =
-  let%sub {current_phase;me;all_trades;_} =
+  let%sub {current_phase;me;all_trades;
+   my_red_bid 
+    ; my_yellow_bid 
+    ; my_blue_bid 
+    ; my_green_bid 
+    ; my_red_ask 
+    ; my_yellow_ask 
+    ; my_blue_ask 
+    ; my_green_ask
+    ; _} =
     client_state
   in
   let%sub {id;cash;_} = me
   in
   match%sub current_phase with
   | Current_phase.Playing ->
-    let%arr id and all_trades and cash in
+    let%arr id and all_trades and cash and my_red_bid and my_green_ask and my_blue_ask and my_blue_bid and my_green_bid and my_red_ask and my_yellow_ask and my_yellow_bid in
     Vdom.Node.div
       ~attrs:[ Vdom.Attr.classes [ "full_page" ] ]
       [ body cash
-      ; Exchange.serve_body ~player_id:id
+      ; Exchange.serve_body ~player_id:id my_red_bid 
+    my_yellow_bid 
+    my_blue_bid 
+    my_green_bid 
+     my_red_ask 
+    my_yellow_ask 
+    my_blue_ask 
+    my_green_ask
       ; Trade_history.body all_trades ]
   | _ -> Bonsai.return {%html|<p>Waiting for others...</p>|}
 ;;
