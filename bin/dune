@@ -2,7 +2,14 @@
  (public_name race-figgie)
  (name main)
  (modes js exe)
- (libraries race_figgie async_kernel core bonsai bonsai_web js_of_ocaml js_of_ocaml-ppx)
+ (libraries
+  race_figgie
+  async_kernel
+  core
+  bonsai
+  bonsai_web
+  js_of_ocaml
+  js_of_ocaml-ppx)
  (promote (until-clean))
  (preprocess
   (pps ppx_jane js_of_ocaml-ppx bonsai.ppx_bonsai ppx_css ppx_html)))

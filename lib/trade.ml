@@ -4,9 +4,7 @@ let remove_one_racer_from_list list racer =
   let rec aux acc = function
     | [] -> List.rev acc
     | h :: t ->
-      if Racer.equal h racer
-      then List.rev_append acc t
-      else aux (h :: acc) t
+      if Racer.equal h racer then List.rev_append acc t else aux (h :: acc) t
   in
   aux [] list
 ;;
@@ -102,11 +100,10 @@ let update_state_on_trade
     Map.add_exn ~key:racer_traded ~data:updated_ask_order_list state.asks
   in
   let updated_fills =
-    Fill.create bidder asker racer_traded trade_price
-    :: state.filled_orders
+    Fill.create bidder asker racer_traded trade_price :: state.filled_orders
   in
   Game_state.update
-  ~current_phase:state.current_phase
+    ~current_phase:state.current_phase
     ~players:updated_players
     ~bids:updated_bids
     ~asks:updated_asks
@@ -115,10 +112,7 @@ let update_state_on_trade
     ~winner:state.winner
 ;;
 
-let check_for_trades_given_racer
-  (state : Game_state.t)
-  ~(racer : Racer.t)
-  =
+let check_for_trades_given_racer (state : Game_state.t) ~(racer : Racer.t) =
   let bids = state.bids in
   let asks = state.asks in
   let racer_bids = Map.find bids racer in

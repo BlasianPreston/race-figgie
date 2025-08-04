@@ -47,9 +47,7 @@ let body () =
     ~attrs:[ Vdom.Attr.classes [ "trade_page" ] ]
     [ banner ()
     ; legend ()
-    ; orders
-        [ Fill.create "Preston" "Joseph" Racer.Blue 10
-        ]
+    ; orders [ Fill.create "Preston" "Joseph" Racer.Blue 10 ]
     ]
 ;;
 

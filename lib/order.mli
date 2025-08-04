@@ -11,7 +11,7 @@ type t =
   ; price : int option
   ; order_type : order_type
   }
-  [@@deriving sexp, bin_io]
+[@@deriving sexp, bin_io]
 
 val create
   :  player_id:string
@@ -21,5 +21,4 @@ val create
   -> t
 
 val is_no_order : t -> bool
-
 val is_bid : t -> bool

@@ -1,8 +1,6 @@
 open Core
 
-let advance_race (state : Game_state.t) =
-  Game_state.update_positions state
-;;
+let advance_race (state : Game_state.t) = Game_state.update_positions state
 
 let check_winner (state : Game_state.t) =
   let race_positions = state.race_positions in
