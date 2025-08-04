@@ -28,27 +28,27 @@ let orders (filled_orders : Fill.t list) =
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "trades" ] ]
     (List.concat_map filled_orders ~f:(fun fill ->
-       [ Vdom.Node.h3 [ Vdom.Node.text fill.buyer ]
-       ; Vdom.Node.h3 [ Vdom.Node.text fill.seller ]
-       ; Vdom.Node.h3 [ Vdom.Node.text (Int.to_string fill.price) ]
-       ; Vdom.Node.h3
-           [ Vdom.Node.img
-               ~attrs:
-                 [ Vdom.Attr.src (Racer.to_img fill.racer)
-                 ; Vdom.Attr.classes [ "trade_img" ]
-                 ]
-               ()
+       [ Vdom.Node.div
+           ~attrs:[ Vdom.Attr.classes [ "fills" ] ]
+           [ Vdom.Node.h3 [ Vdom.Node.text fill.buyer ]
+           ; Vdom.Node.h3 [ Vdom.Node.text fill.seller ]
+           ; Vdom.Node.h3 [ Vdom.Node.text (Int.to_string fill.price) ]
+           ; Vdom.Node.h3
+               [ Vdom.Node.img
+                   ~attrs:
+                     [ Vdom.Attr.src (Racer.to_img fill.racer)
+                     ; Vdom.Attr.classes [ "trade_img" ]
+                     ]
+                   ()
+               ]
            ]
        ]))
 ;;
 
-let body  (filled_orders : Fill.t list)=
+let body (filled_orders : Fill.t list) =
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "trade_page" ] ]
-    [ banner ()
-    ; legend ()
-    ; orders filled_orders
-    ]
+    [ banner (); legend (); orders filled_orders ]
 ;;
 
 let serve_body filled_orders = Bonsai.return (body filled_orders)

@@ -136,7 +136,8 @@ body {
     border-radius: 25px;
     padding: 20px;
     text-align: center;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr;
     justify-content: space-evenly;
     max-height: 1200px;
 }
@@ -168,4 +169,9 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     justify-content: center;
+}
+
+.fills {
+    display: flex;
+    justify-content: space-evenly;
 }
