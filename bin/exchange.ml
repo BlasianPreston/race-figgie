@@ -22,7 +22,7 @@ module Orders = struct
   [@@deriving fields]
 end
 
-let red_orders (red_bid: int option) (red_ask: int option) =
+let red_orders (red_bid : int option) (red_ask : int option) =
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "red" ] ]
     [ Vdom.Node.img
@@ -32,14 +32,20 @@ let red_orders (red_bid: int option) (red_ask: int option) =
         ~attrs:[ Vdom.Attr.classes [ "orders" ] ]
         [ Vdom.Node.input
             ~attrs:
-              [ Vdom.Attr.placeholder (match red_bid with |Some bid -> (Int.to_string bid) |None -> "Bid")
+              [ Vdom.Attr.placeholder
+                  (match red_bid with
+                   | Some bid -> Int.to_string bid
+                   | None -> "Bid")
               ; Vdom.Attr.classes [ "red_order" ]
               ; Vdom.Attr.type_ "number"
               ]
             ()
         ; Vdom.Node.input
             ~attrs:
-              [ Vdom.Attr.placeholder (match red_ask with |Some ask -> Int.to_string ask |None -> "Ask")
+              [ Vdom.Attr.placeholder
+                  (match red_ask with
+                   | Some ask -> Int.to_string ask
+                   | None -> "Ask")
               ; Vdom.Attr.classes [ "red_order" ]
               ; Vdom.Attr.type_ "number"
               ]
@@ -48,7 +54,7 @@ let red_orders (red_bid: int option) (red_ask: int option) =
     ]
 ;;
 
-let yellow_orders (yellow_bid: int option) (yellow_ask: int option) =
+let yellow_orders (yellow_bid : int option) (yellow_ask : int option) =
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "yellow" ] ]
     [ Vdom.Node.img
@@ -58,14 +64,20 @@ let yellow_orders (yellow_bid: int option) (yellow_ask: int option) =
         ~attrs:[ Vdom.Attr.classes [ "orders" ] ]
         [ Vdom.Node.input
             ~attrs:
-              [ Vdom.Attr.placeholder (match yellow_bid with |Some bid -> Int.to_string bid |None -> "Bid")
+              [ Vdom.Attr.placeholder
+                  (match yellow_bid with
+                   | Some bid -> Int.to_string bid
+                   | None -> "Bid")
               ; Vdom.Attr.classes [ "yellow_order" ]
               ; Vdom.Attr.type_ "number"
               ]
             ()
         ; Vdom.Node.input
             ~attrs:
-              [ Vdom.Attr.placeholder (match yellow_ask with |Some ask -> Int.to_string ask |None -> "Ask")
+              [ Vdom.Attr.placeholder
+                  (match yellow_ask with
+                   | Some ask -> Int.to_string ask
+                   | None -> "Ask")
               ; Vdom.Attr.classes [ "yellow_order" ]
               ; Vdom.Attr.type_ "number"
               ]
@@ -74,7 +86,7 @@ let yellow_orders (yellow_bid: int option) (yellow_ask: int option) =
     ]
 ;;
 
-let blue_orders (blue_bid: int option) (blue_ask: int option) =
+let blue_orders (blue_bid : int option) (blue_ask : int option) =
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "blue" ] ]
     [ Vdom.Node.img
@@ -84,14 +96,20 @@ let blue_orders (blue_bid: int option) (blue_ask: int option) =
         ~attrs:[ Vdom.Attr.classes [ "orders" ] ]
         [ Vdom.Node.input
             ~attrs:
-              [ Vdom.Attr.placeholder (match blue_bid with |Some bid -> Int.to_string bid |None -> "Bid")
+              [ Vdom.Attr.placeholder
+                  (match blue_bid with
+                   | Some bid -> Int.to_string bid
+                   | None -> "Bid")
               ; Vdom.Attr.classes [ "blue_order" ]
               ; Vdom.Attr.type_ "number"
               ]
             ()
         ; Vdom.Node.input
             ~attrs:
-              [ Vdom.Attr.placeholder (match blue_ask with |Some ask -> Int.to_string ask |None -> "Ask")
+              [ Vdom.Attr.placeholder
+                  (match blue_ask with
+                   | Some ask -> Int.to_string ask
+                   | None -> "Ask")
               ; Vdom.Attr.classes [ "blue_order" ]
               ; Vdom.Attr.type_ "number"
               ]
@@ -100,7 +118,7 @@ let blue_orders (blue_bid: int option) (blue_ask: int option) =
     ]
 ;;
 
-let green_orders (green_bid: int option) (green_ask: int option) =
+let green_orders (green_bid : int option) (green_ask : int option) =
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "green" ] ]
     [ Vdom.Node.img
@@ -110,14 +128,20 @@ let green_orders (green_bid: int option) (green_ask: int option) =
         ~attrs:[ Vdom.Attr.classes [ "orders" ] ]
         [ Vdom.Node.input
             ~attrs:
-              [ Vdom.Attr.placeholder (match green_bid with |Some bid -> Int.to_string bid |None -> "Bid")
+              [ Vdom.Attr.placeholder
+                  (match green_bid with
+                   | Some bid -> Int.to_string bid
+                   | None -> "Bid")
               ; Vdom.Attr.classes [ "green_order" ]
               ; Vdom.Attr.type_ "number"
               ]
             ()
         ; Vdom.Node.input
             ~attrs:
-              [ Vdom.Attr.placeholder (match green_ask with |Some ask -> Int.to_string ask |None -> "Ask")
+              [ Vdom.Attr.placeholder
+                  (match green_ask with
+                   | Some ask -> Int.to_string ask
+                   | None -> "Ask")
               ; Vdom.Attr.classes [ "green_order" ]
               ; Vdom.Attr.type_ "number"
               ]
@@ -177,7 +201,17 @@ let submit_button ~player_id ~on_submit : Vdom.Node.t =
 
 (* Bonsai component *)
 
-let component ~player_id red_bid red_ask blue_bid blue_ask yellow_bid yellow_ask green_bid green_ask=
+let component
+  ~player_id
+  red_bid
+  red_ask
+  blue_bid
+  blue_ask
+  yellow_bid
+  yellow_ask
+  green_bid
+  green_ask
+  =
   Vdom.Node.div
     [ Vdom.Node.form
         ~attrs:[ Vdom.Attr.classes [ "exchange_page" ] ]
@@ -190,4 +224,25 @@ let component ~player_id red_bid red_ask blue_bid blue_ask yellow_bid yellow_ask
     ]
 ;;
 
-let serve_body ~player_id red_bid red_ask blue_bid blue_ask yellow_bid yellow_ask green_bid green_ask = component ~player_id red_bid red_ask blue_bid blue_ask yellow_bid yellow_ask green_bid green_ask
+let serve_body
+  ~player_id
+  red_bid
+  red_ask
+  blue_bid
+  blue_ask
+  yellow_bid
+  yellow_ask
+  green_bid
+  green_ask
+  =
+  component
+    ~player_id
+    red_bid
+    red_ask
+    blue_bid
+    blue_ask
+    yellow_bid
+    yellow_ask
+    green_bid
+    green_ask
+;;

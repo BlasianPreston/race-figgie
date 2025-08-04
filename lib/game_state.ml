@@ -283,8 +283,12 @@ let add_player_and_possibly_add_hand t name =
 let reset_hands t =
   let players = t.players in
   let all_players = Map.data players in
-  let players_assc_lst = List.map all_players ~f:(fun player -> (player.id, {player with holdings = []})) in
-  {t with players = (String.Map.of_alist_exn players_assc_lst)}
+  let players_assc_lst =
+    List.map all_players ~f:(fun player ->
+      player.id, { player with holdings = [] })
+  in
+  { t with players = String.Map.of_alist_exn players_assc_lst }
+;;
 
 let create
   ~current_phase

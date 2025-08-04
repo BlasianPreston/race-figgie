@@ -248,56 +248,51 @@ let wait_for_winner (game_state : Game_state.t ref) =
 
 let compute_round_results (game_state : Game_state.t ref) =
   let players = Map.data !game_state.players in
-
   (* Determine the goal suite *)
   let goal_suite =
     match !game_state.winner with
     | Some suite -> suite
     | None -> failwith "Goal suite (winner) not set"
   in
-
   (* Count how many goal suite cards each player has *)
   let player_goal_counts =
     List.map players ~f:(fun player ->
       let count =
-        List.count player.holdings ~f:(fun card -> Racer.equal card goal_suite)
+        List.count player.holdings ~f:(fun card ->
+          Racer.equal card goal_suite)
       in
-      (player.id, player, count)
-    )
+      player.id, player, count)
   in
-
   (* Determine the winner — player with most of the goal suite *)
   let winner_id, _, _ =
-    List.max_elt player_goal_counts ~compare:(fun (_, _, a) (_, _, b) -> Int.compare a b)
+    List.max_elt player_goal_counts ~compare:(fun (_, _, a) (_, _, b) ->
+      Int.compare a b)
     |> Option.value_exn
   in
-
   (* Apply earnings *)
   let updated_players =
     List.map player_goal_counts ~f:(fun (id, player, count) ->
-      if String.equal id winner_id then
+      if String.equal id winner_id
+      then (
         let penalty = (10 - count) * 10 in
         let earnings = 200 - penalty in
-        { player with cash = player.cash + earnings }
-      else
+        { player with cash = player.cash + earnings })
+      else (
         let earnings = count * 10 in
-        { player with cash = player.cash + earnings }
-    )
+        { player with cash = player.cash + earnings }))
   in
-
   (* Update map with cleared holdings *)
   let updated_players_assoc =
     List.map updated_players ~f:(fun player ->
-      (player.id, { player with holdings = [] })
-    )
+      player.id, { player with holdings = [] })
   in
-
   let updated_player_map = String.Map.of_alist_exn updated_players_assoc in
   game_state := { !game_state with players = updated_player_map }
+;;
 
 let end_game (game_state : Game_state.t ref) =
-  game_state := {!game_state with current_phase = Current_phase.End}
-
+  game_state := { !game_state with current_phase = Current_phase.End }
+;;
 
 let _handle_round (game_state : Game_state.t ref) ~(_round : int)
   : unit Deferred.t
@@ -309,7 +304,9 @@ let _handle_round (game_state : Game_state.t ref) ~(_round : int)
   wait_for_winner game_state;
   compute_round_results game_state;
   end_game game_state;
-  let%bind () = sleep 1 in return ()
+  let%bind () = sleep 1 in
+  return ()
+;;
 
 let web_handler =
   Cohttp_static_handler.Single_page_handler.create_handler
