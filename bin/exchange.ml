@@ -143,12 +143,8 @@ let get_input_value_by_class (class_name : string) (index : int)
      | Some input -> Some (to_string input##.value))
 ;;
 
-let get_orders_for_racer ~player_id (racer : Racer.t)
-  : Order.t list
-  =
-  let class_name =
-    String.lowercase (Racer.to_string racer) ^ "_order"
-  in
+let get_orders_for_racer ~player_id (racer : Racer.t) : Order.t list =
+  let class_name = String.lowercase (Racer.to_string racer) ^ "_order" in
   let bid_str = get_input_value_by_class class_name 0 in
   let ask_str = get_input_value_by_class class_name 1 in
   let parse_price s = Option.bind s ~f:Int.of_string_opt in
@@ -189,8 +185,7 @@ let component ~player_id =
         ; yellow_orders
         ; blue_orders
         ; green_orders
-        ; submit_button ~player_id ~on_submit:(fun _ ->
-            Ui_effect.Ignore)
+        ; submit_button ~player_id ~on_submit:(fun _ -> Ui_effect.Ignore)
         ]
     ]
 ;;

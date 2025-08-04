@@ -219,15 +219,18 @@ let _start_game (authoritative_game_state : Game_state.t ref) =
 ;;
 
 let handle_new_player (game_state : Game_state.t ref) name =
-  game_state := Game_state.add_player_and_possibly_add_hand !game_state name; Ok "Ok"
+  game_state := Game_state.add_player_and_possibly_add_hand !game_state name;
+  Ok "Ok"
 ;;
 
 let handle_order_placed (game_state : Game_state.t ref) (order : Order.t) =
-  game_state := Game_state.add_order !game_state order; Ok "Ok"
+  game_state := Game_state.add_order !game_state order;
+  Ok "Ok"
 ;;
 
 let handle_order_filled (game_state : Game_state.t ref) fill =
-  game_state := Game_state.add_fill !game_state fill; Ok "Ok"
+  game_state := Game_state.add_fill !game_state fill;
+  Ok "Ok"
 ;;
 
 let handle_client_message
