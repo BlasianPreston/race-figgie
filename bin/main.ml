@@ -14,7 +14,7 @@ let buying_power bp =
     ]
 ;;
 
-let body () =
+let body bp =
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "race_column" ] ]
     [ Vdom.Node.h1
@@ -26,7 +26,7 @@ let body () =
           ; Vdom.Attr.src "../images/race.png"
           ]
         ()
-    ; buying_power 400
+    ; buying_power bp
     ]
 ;;
 
@@ -35,11 +35,19 @@ let body () =
 let dummy_client_state : Client_state.t Bonsai.t =
   Bonsai.return
     { Client_state.current_phase = Current_phase.Playing
-    ; all_trades = []
+    ; all_trades = [ Fill.create "Preston" "Joseph" Racer.Blue 10 ; Fill.create "Bari" "Fahim" Racer.Red 10]
     ; players = []
     ; ready_players = []
     ; shown_racers = []
-    ; me = { id = "joseph"; holdings = []; cash = 400 }
+    ; my_red_bid = None
+    ; my_yellow_bid = None
+    ; my_blue_bid = None
+    ; my_green_bid = None
+    ; my_red_ask = None
+    ; my_yellow_ask = None
+    ; my_blue_ask = None
+    ; my_green_ask = None
+    ; me = { id = "joseph"; holdings = []; cash = 69 }
     } 
 ;;
 
@@ -47,19 +55,19 @@ let page
   (client_state : Client_state.t Bonsai.t)
   (local_ _graph)
   =
-  let%sub {current_phase;me;_} =
+  let%sub {current_phase;me;all_trades;_} =
     client_state
   in
-  let%sub {id;_} = me
+  let%sub {id;cash;_} = me
   in
   match%sub current_phase with
   | Current_phase.Playing ->
-    let%arr id in
+    let%arr id and all_trades and cash in
     Vdom.Node.div
       ~attrs:[ Vdom.Attr.classes [ "full_page" ] ]
-      [ body ()
+      [ body cash
       ; Exchange.serve_body ~player_id:id
-      ; Trade_history.body () ]
+      ; Trade_history.body all_trades ]
   | _ -> Bonsai.return {%html|<p>Waiting for others...</p>|}
 ;;
 

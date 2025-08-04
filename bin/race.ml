@@ -13,7 +13,7 @@ let buying_power bp =
     ]
 ;;
 
-let body () =
+let body bp =
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "race_column" ] ]
     [ Vdom.Node.h1
@@ -25,6 +25,6 @@ let body () =
           ; Vdom.Attr.src "../images/race.png"
           ]
         ()
-    ; buying_power 400
+    ; buying_power bp
     ]
 ;;

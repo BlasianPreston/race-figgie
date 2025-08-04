@@ -246,7 +246,7 @@ let wait_for_winner (game_state : Game_state.t ref) =
   loop 1
 ;;
 
-let compute_round_results (game_state : Game_state.t ref) = 
+(* let compute_round_results (game_state : Game_state.t ref) = 
   let players = Map.data 
 
 let rec handle_round (game_state : Game_state.t ref) ~(round : int)
@@ -265,7 +265,7 @@ let rec handle_round (game_state : Game_state.t ref) ~(round : int)
   else (
     let%bind () = phase game_state Game_results in
     reset game_state)
-;;
+;; *)
 
 let web_handler =
   Cohttp_static_handler.Single_page_handler.create_handler

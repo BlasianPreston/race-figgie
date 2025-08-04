@@ -42,13 +42,13 @@ let orders (filled_orders : Fill.t list) =
        ]))
 ;;
 
-let body () =
+let body  (filled_orders : Fill.t list)=
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "trade_page" ] ]
     [ banner ()
     ; legend ()
-    ; orders [ Fill.create "Preston" "Joseph" Racer.Blue 10 ]
+    ; orders filled_orders
     ]
 ;;
 
-let serve_body () = Bonsai.return (body ())
+let serve_body filled_orders = Bonsai.return (body filled_orders)
