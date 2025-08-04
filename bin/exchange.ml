@@ -190,7 +190,6 @@ let component ~player_id =
         ; blue_orders
         ; green_orders
         ; submit_button ~player_id ~on_submit:(fun _ ->
-            (* process orders, update state, then: *)
             Ui_effect.Ignore)
         ]
     ]
