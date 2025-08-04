@@ -63,6 +63,12 @@ let get_client_state_from_name (t : t) (name : string) : Client_state.t =
   { current_phase; all_trades; players; ready_players; me; shown_racers }
 ;;
 
+let name_taken t name =
+  let players = t.players in
+  match Map.find players name with
+  | Some _ -> true
+  | None -> false
+
 let add_player t name =
   let players = t.players in
   match Map.find players name with
@@ -72,6 +78,10 @@ let add_player t name =
     }
   | Some _ -> failwith "Player already exists"
 ;;
+
+let initialize_racers t =
+  let racers = [(Racer.Red, 0, 0); (Racer.Yellow, 0, 0); (Racer.Blue, 0, 0); (Racer.Green, 0, 0)] in
+  { t with race_positions = racers}
 
 let rec shuffle = function
   | [] -> []
@@ -126,6 +136,12 @@ let add_hands_to_players t =
   ; winner = None
   }
 ;;
+
+let add_player_and_possibly_add_hand t name =
+  let current_players = t.players in
+  let all_players = Map.add_exn ~key:name ~data:(Player.create name) current_players in
+  let new_state = {t with players=all_players} in
+  if Map.length all_players = 4 then add_hands_to_players new_state else new_state
 
 let create
   ~current_phase

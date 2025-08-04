@@ -14,24 +14,18 @@ let sleep (seconds : int) =
   return ()
 ;;
 
-let change_game_phase (game_state : Game_state.t ref) (phase : Current_phase.t) =
+let change_game_phase
+  (game_state : Game_state.t ref)
+  (phase : Current_phase.t)
+  =
   game_state := { !game_state with current_phase = phase }
 ;;
 
 let reset (game_state : Game_state.t ref) =
   let new_player_map =
-    Map.map !game_state.players ~f:(fun player ->
-      Player.create player.id)
+    Map.map !game_state.players ~f:(fun player -> Player.create player.id)
   in
-  game_state
-  := { (Game_state.empty ()) with players = new_player_map };
-  return ()
-;;
-
-let phase (game_state : Game_state.t ref) (phase_to_change_to : Current_phase.t)
-  =
-  change_game_phase game_state phase_to_change_to;
-  let%bind () = sleep (Game_phase.to_duration phase_to_change_to) in
+  game_state := { (Game_state.empty ()) with players = new_player_map };
   return ()
 ;;
 
@@ -39,20 +33,18 @@ let remove_one_racer_from_list list racer =
   let rec aux acc = function
     | [] -> List.rev acc
     | h :: t ->
-      if Game_state.Racer.equal h racer
-      then List.rev_append acc t
-      else aux (h :: acc) t
+      if Racer.equal h racer then List.rev_append acc t else aux (h :: acc) t
   in
   aux [] list
 ;;
 
-let get_best_bid_order ~(bid_order_list : Game_state.Order.t list) =
+let get_best_bid_order ~(bid_order_list : Order.t list) =
   List.filter_map bid_order_list ~f:(fun { player_id; price; _ } ->
     Option.map price ~f:(fun p -> p, player_id))
   |> List.max_elt ~compare:(fun (p1, _) (p2, _) -> Int.compare p1 p2)
 ;;
 
-let get_best_ask_order ~(ask_order_list : Game_state.Order.t list) =
+let get_best_ask_order ~(ask_order_list : Order.t list) =
   List.filter_map ask_order_list ~f:(fun { player_id; price; _ } ->
     Option.map price ~f:(fun p -> p, player_id))
   |> List.min_elt ~compare:(fun (p1, _) (p2, _) -> Int.compare p1 p2)
@@ -60,7 +52,7 @@ let get_best_ask_order ~(ask_order_list : Game_state.Order.t list) =
 
 let rec remove_player_order_from_order_list
   ~player
-  ~(order_list : Game_state.Order.t list)
+  ~(order_list : Order.t list)
   =
   match order_list with
   | [] -> []
@@ -73,14 +65,14 @@ let rec remove_player_order_from_order_list
 ;;
 
 let update_state_on_trade
-  (state : Game_state.State.t)
+  (state : Game_state.t)
   ~bidder
   ~trade_price
   ~bid
   ~asker
   ~ask_order_list
   ~bid_order_list
-  ~(racer_traded : Game_state.Racer.t)
+  ~(racer_traded : Racer.t)
   =
   let updated_bid_order_list =
     remove_player_order_from_order_list
@@ -137,11 +129,10 @@ let update_state_on_trade
     Map.add_exn ~key:racer_traded ~data:updated_ask_order_list state.asks
   in
   let updated_fills =
-    Game_state.Fill.create bidder asker racer_traded trade_price
-    :: state.filled_orders
+    Fill.create bidder asker racer_traded trade_price :: state.filled_orders
   in
-  Game_state.State.update
-  ~current_state:state.current_state
+  Game_state.update
+    ~current_phase:state.current_phase
     ~players:updated_players
     ~bids:updated_bids
     ~asks:updated_asks
@@ -150,10 +141,7 @@ let update_state_on_trade
     ~winner:state.winner
 ;;
 
-let check_for_trades_given_racer
-  (state : Game_state.State.t)
-  ~(racer : Game_state.Racer.t)
-  =
+let check_for_trades_given_racer (state : Game_state.t) ~(racer : Racer.t) =
   let bids = state.bids in
   let asks = state.asks in
   let racer_bids = Map.find bids racer in
@@ -180,7 +168,7 @@ let check_for_trades_given_racer
             ~racer_traded:racer))
 ;;
 
-let match_orders (state : Game_state.State.t) =
+let match_orders (state : Game_state.t) =
   (* Match highest bid with lowest ask if bid >= ask *)
   (* Update players' holdings and cash accordingly *)
   check_for_trades_given_racer state ~racer:Red
@@ -189,22 +177,21 @@ let match_orders (state : Game_state.State.t) =
   |> check_for_trades_given_racer ~racer:Blue
 ;;
 
-let check_winner (game_state : Game_state.State.t ref) =
+let check_winner (game_state : Game_state.t ref) =
   let state = !game_state in
   let racers = state.race_positions in
-  let winning_racer = List.filter racers ~f:(fun (_, _, distance) -> if distance >= 500 then true else false) in
+  let winning_racer =
+    List.filter racers ~f:(fun (_, _, distance) ->
+      if distance >= 500 then true else false)
+  in
   match List.is_empty winning_racer with
   | true -> ()
-  | false -> match List.hd_exn winning_racer with
-  | racer, _, _ -> game_state := (Game_state.State.set_winner state (Some racer)) 
-
-let compute_round_results (authoritative_game_state : Game_state.State.t ref) =
-  authoritative_game_state
-  := Game_state.apply_actions_taken !authoritative_game_state
-     |> Game_state.compile_all_elimination_results
+  | false ->
+    (match List.hd_exn winning_racer with
+     | racer, _, _ -> game_state := Game_state.set_winner state (Some racer))
 ;;
 
-let rec handle_round
+(* let rec handle_round
   (authoritative_game_state : Game_state.t ref)
   ~(round : int)
   : unit Deferred.t
@@ -221,130 +208,48 @@ let rec handle_round
   else (
     let%bind () = phase authoritative_game_state Game_results in
     reset authoritative_game_state)
-;;
+;; *)
 
-let everyone_is_ready (authoritative_game_state : Game_state.t ref) =
-  List.length !authoritative_game_state.ready_players
-  = Map.length !authoritative_game_state.players
+let everyone_is_ready (game_state : Game_state.t ref) =
+  Map.length !game_state.players = 4
 ;;
 
 let start_game (authoritative_game_state : Game_state.t ref) =
-  let%bind () = phase authoritative_game_state Rules in
+  let%bind () = change_game_phase authoritative_game_state Current_phase.Playing in
   handle_round authoritative_game_state ~round:1
 ;;
 
-let handle_ready_message
+let handle_ready_players
   (authoritative_game_state : Game_state.t ref)
   (query : Rpcs.Client_message.Ready_status_change.t)
   : Rpcs.Client_message.Response.t
   =
   match Game_state.name_taken !authoritative_game_state query.name with
   | true ->
-    authoritative_game_state
-    := Game_state.ready_player !authoritative_game_state query;
     if everyone_is_ready authoritative_game_state
     then start_game authoritative_game_state |> don't_wait_for;
     Ok "OK"
   | false -> Error "Player name isn't registered"
 ;;
 
-let handle_item_selection
-  (authoritative_game_state : Game_state.t ref)
-  (query : Rpcs.Client_message.Item_selection.t)
-  : Rpcs.Client_message.Response.t
-  =
-  match
-    Game_phase.equal
-      Game_phase.Item_selection
-      !authoritative_game_state.current_phase
-  with
-  | true ->
-    authoritative_game_state
-    := Game_state.add_item_to_inventory !authoritative_game_state query;
-    Ok "OK"
-  | false -> Error "It is not currently the item selection phase"
-;;
-
-let handle_message
-  (authoritative_game_state : Game_state.t ref)
-  (message : Message.t)
-  : Rpcs.Client_message.Response.t
-  =
-  match
-    Game_phase.equal
-      Game_phase.Negotiation
-      !authoritative_game_state.current_phase
-  with
-  | true ->
-    authoritative_game_state
-    := Game_state.add_message !authoritative_game_state message;
-    Ok "OK"
-  | false -> Error "It is not currently the negotiation phase"
-;;
-
-let handle_item_used
-  (authoritative_game_state : Game_state.t ref)
-  (action : Action.t)
-  : Rpcs.Client_message.Response.t
-  =
-  match
-    Game_phase.equal
-      Game_phase.Item_usage
-      !authoritative_game_state.current_phase
-  with
-  | true ->
-    authoritative_game_state
-    := Game_state.add_action !authoritative_game_state action;
-    Ok "OK"
-  | false -> Error "It is not currently the item usage phase"
-;;
-
-let handle_new_player
-  (authoritative_game_state : Game_state.t ref)
-  (name : string)
-  : Rpcs.Client_message.Response.t
-  =
-  match Game_state.name_taken !authoritative_game_state name with
-  | true -> Error "Name already taken"
-  | false ->
-    authoritative_game_state
-    := Game_state.add_player
-         !authoritative_game_state
-         (Player.new_player name);
-    Ok "OK"
-;;
-
-let handle_client_message
-  (query : Rpcs.Client_message.Query.t)
-  (authoritative_game_state : Game_state.t ref)
-  =
-  match query with
-  | New_player name -> handle_new_player authoritative_game_state name
-  | Ready_status_change status_change ->
-    handle_ready_message authoritative_game_state status_change
-  | Item_selection item_selection ->
-    handle_item_selection authoritative_game_state item_selection
-  | Chat_message message -> handle_message authoritative_game_state message
-  | Item_used action -> handle_item_used authoritative_game_state action
-;;
 
 let web_handler =
   Cohttp_static_handler.Single_page_handler.create_handler
     (Cohttp_static_handler.Single_page_handler.default_with_body_div
        ~div_id:"app")
-    ~title:"Hangry Squid"
+    ~title:"Race Figgie"
     ~on_unknown_url:`Not_found
     ~assets:
       [ Cohttp_static_handler.Asset.local
           Cohttp_static_handler.Asset.Kind.javascript
           (Cohttp_static_handler.Asset.What_to_serve.file
              ~relative_to:`Exe
-             ~path:"../client/main.bc.js")
+             ~path:"../bin/main.bc.js")
       ; Cohttp_static_handler.Asset.local
           Cohttp_static_handler.Asset.Kind.css
           (Cohttp_static_handler.Asset.What_to_serve.file
              ~relative_to:`Exe
-             ~path:"../client/style.css")
+             ~path:"../bin/styles.css")
       ]
 ;;
 
@@ -393,6 +298,6 @@ let start_server_command =
     (let%map_open.Command host_and_server_port =
        flag "address" (required host_and_port) ~doc:"<host>:<port>"
      in
-     let authoritative_game_state = ref (Game_state.create_empty_game ()) in
+     let authoritative_game_state = ref (Game_state.empty ()) in
      fun () -> start_server host_and_server_port authoritative_game_state)
 ;;

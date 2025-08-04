@@ -39,3 +39,8 @@ type velocity = int
   val set_winner : t -> Racer.t option -> t
   val empty : unit -> t
   val get_client_state_from_name : t -> string -> Client_state.t
+  val name_taken : t -> string -> bool
+  val add_player : t -> string -> t
+  val initialize_racers : t -> t
+  val add_hands_to_player : t -> t
+  val add_player_and_possibly_add_hand : t -> string -> t
