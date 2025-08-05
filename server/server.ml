@@ -264,16 +264,14 @@ let end_game (game_state : Game_state.t ref) =
   game_state := { !game_state with current_phase = Current_phase.End }
 ;;
 
-let handle_round (game_state : Game_state.t ref)
-  (* : unit Deferred.t *)
-  =
+let handle_round (game_state : Game_state.t ref) (* : unit Deferred.t *) =
   let reset_player_hands = Game_state.reset_hands !game_state in
   game_state := Game_state.add_hands_to_players reset_player_hands;
   take_money_for_pot game_state;
   start_game game_state;
   wait_for_winner game_state;
   compute_round_results game_state;
-  end_game game_state;
+  end_game game_state
 ;;
 
 let handle_new_player (game_state : Game_state.t ref) name =
