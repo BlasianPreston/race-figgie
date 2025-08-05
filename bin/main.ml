@@ -35,7 +35,7 @@ let body bp =
 (* Dummy client state *)
 let dummy_client_state : Client_state.t Bonsai.t =
   Bonsai.return
-    { Client_state.current_phase = Current_phase.Enter_user
+    { Client_state.current_phase = Current_phase.Playing
     ; all_trades =
         [ Fill.create "Preston" "Joseph" Racer.Blue 10
         ; Fill.create "Bari" "Fahim" Racer.Red 10
@@ -76,7 +76,7 @@ let page (local_ _graph) =
 
 
 
-  let%sub { current_phasea
+  let%sub { current_phase
           ; me
           ; all_trades
           ; my_red_bid
