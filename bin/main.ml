@@ -33,7 +33,7 @@ let body bp =
 (* Dummy client state *)
 let dummy_client_state : Client_state.t Bonsai.t =
   Bonsai.return
-    { Client_state.current_phase = Current_phase.Playing
+    { Client_state.current_phase = Current_phase.Enter_user
     ; all_trades =
         [ Fill.create "Preston" "Joseph" Racer.Blue 10
         ; Fill.create "Bari" "Fahim" Racer.Red 10
@@ -99,6 +99,7 @@ let page (client_state : Client_state.t Bonsai.t) (local_ _graph) =
           ~my_green_ask
       ; Trade_history.body all_trades
       ]
+  | Current_phase.Enter_user -> Bonsai.return (Username.body ())
   | _ -> Bonsai.return {%html|<p>Waiting for others...</p>|}
 ;;
 

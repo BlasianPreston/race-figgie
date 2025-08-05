@@ -9,11 +9,6 @@ let handle_client_requesting_client_state
   Game_state.get_client_state_from_name !authoritative_game_state query.name
 ;;
 
-let sleep (seconds : int) =
-  let%bind () = Clock_ns.after (Time_ns.Span.of_int_sec seconds) in
-  return ()
-;;
-
 let change_game_phase
   (game_state : Game_state.t ref)
   (phase : Current_phase.t)
@@ -191,7 +186,7 @@ let _check_winner (game_state : Game_state.t ref) =
      | racer, _, _ -> game_state := Game_state.set_winner state (Some racer))
 ;;
 
-let _everyone_is_ready (game_state : Game_state.t ref) =
+let everyone_is_ready (game_state : Game_state.t ref) =
   Map.length !game_state.players = 4
 ;;
 
@@ -201,31 +196,6 @@ let start_game (game_state : Game_state.t ref) =
 
 let take_money_for_pot (game_state : Game_state.t ref) =
   game_state := Game_state.take_money_for_pot !game_state
-;;
-
-let handle_new_player (game_state : Game_state.t ref) name =
-  game_state := Game_state.add_player_and_possibly_add_hand !game_state name;
-  Ok "Ok"
-;;
-
-let handle_order_placed (game_state : Game_state.t ref) (order : Order.t) =
-  game_state := Game_state.add_order !game_state order;
-  Ok "Ok"
-;;
-
-let handle_order_filled (game_state : Game_state.t ref) fill =
-  game_state := Game_state.add_fill !game_state fill;
-  Ok "Ok"
-;;
-
-let handle_client_message
-  (query : Rpcs.Client_message.Query.t)
-  (game_state : Game_state.t ref)
-  =
-  match query with
-  | New_player name -> handle_new_player game_state name
-  | Order_placed order -> handle_order_placed game_state order
-  | Order_filled fill -> handle_order_filled game_state fill
 ;;
 
 let wait_for_winner (game_state : Game_state.t ref) =
@@ -294,8 +264,8 @@ let end_game (game_state : Game_state.t ref) =
   game_state := { !game_state with current_phase = Current_phase.End }
 ;;
 
-let _handle_round (game_state : Game_state.t ref) ~(_round : int)
-  : unit Deferred.t
+let handle_round (game_state : Game_state.t ref)
+  (* : unit Deferred.t *)
   =
   let reset_player_hands = Game_state.reset_hands !game_state in
   game_state := Game_state.add_hands_to_players reset_player_hands;
@@ -304,8 +274,32 @@ let _handle_round (game_state : Game_state.t ref) ~(_round : int)
   wait_for_winner game_state;
   compute_round_results game_state;
   end_game game_state;
-  let%bind () = sleep 1 in
-  return ()
+;;
+
+let handle_new_player (game_state : Game_state.t ref) name =
+  game_state := Game_state.add_player_and_possibly_add_hand !game_state name;
+  if everyone_is_ready game_state then handle_round game_state;
+  Ok "Ok"
+;;
+
+let handle_order_placed (game_state : Game_state.t ref) (order : Order.t) =
+  game_state := Game_state.add_order !game_state order;
+  Ok "Ok"
+;;
+
+let handle_order_filled (game_state : Game_state.t ref) fill =
+  game_state := Game_state.add_fill !game_state fill;
+  Ok "Ok"
+;;
+
+let handle_client_message
+  (query : Rpcs.Client_message.Query.t)
+  (game_state : Game_state.t ref)
+  =
+  match query with
+  | New_player name -> handle_new_player game_state name
+  | Order_placed order -> handle_order_placed game_state order
+  | Order_filled fill -> handle_order_filled game_state fill
 ;;
 
 let web_handler =

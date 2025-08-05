@@ -175,3 +175,37 @@ body {
     display: flex;
     justify-content: space-evenly;
 }
+
+.username_page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    flex-direction: column;
+}
+
+.username_title {
+    display: flex;
+    font-size: 70px;
+    font-family: "Jersey 10";
+    margin: 0;
+}
+
+.username_form {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
+    justify-content: center;
+    width: 400px;
+}
+
+.username_input {
+    display: flex;
+    height: 30px;
+    font-size: 20px;
+}
+
+.username_submit {
+    background-color: #22B14C;
+    height: 30px;
+}
