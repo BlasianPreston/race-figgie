@@ -20,9 +20,23 @@ module Orders = struct
     ; green_ask : int option
     }
   [@@deriving fields]
+
+  let create () =
+    { red_bid = None
+    ; red_ask = None
+    ; yellow_bid = None
+    ; yellow_ask = None
+    ; blue_bid = None
+    ; blue_ask = None
+    ; green_bid = None
+    ; green_ask = None
+    }
+  ;;
 end
 
-let red_orders (red_bid : int option) (red_ask : int option) =
+let red_orders (state : Orders.t Bonsai.t) inject =
+  let%sub { Orders.red_bid; red_ask; _ } = state in
+  let%arr red_bid and red_ask and inject in
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "red" ] ]
     [ Vdom.Node.img
@@ -38,6 +52,8 @@ let red_orders (red_bid : int option) (red_ask : int option) =
                    | None -> "Bid")
               ; Vdom.Attr.classes [ "red_order" ]
               ; Vdom.Attr.type_ "number"
+              ; Vdom.Attr.on_input (fun _ current_order ->
+                  inject (`Update_red_bid current_order))
               ]
             ()
         ; Vdom.Node.input
@@ -48,13 +64,17 @@ let red_orders (red_bid : int option) (red_ask : int option) =
                    | None -> "Ask")
               ; Vdom.Attr.classes [ "red_order" ]
               ; Vdom.Attr.type_ "number"
+              ; Vdom.Attr.on_input (fun _ current_order ->
+                  inject (`Update_red_ask current_order))
               ]
             ()
         ]
     ]
 ;;
 
-let yellow_orders (yellow_bid : int option) (yellow_ask : int option) =
+let yellow_orders state inject =
+  let%sub { Orders.yellow_bid; yellow_ask; _ } = state in
+  let%arr yellow_bid and yellow_ask and inject in
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "yellow" ] ]
     [ Vdom.Node.img
@@ -70,6 +90,8 @@ let yellow_orders (yellow_bid : int option) (yellow_ask : int option) =
                    | None -> "Bid")
               ; Vdom.Attr.classes [ "yellow_order" ]
               ; Vdom.Attr.type_ "number"
+              ; Vdom.Attr.on_input (fun _ current_order ->
+                  inject (`Update_yellow_bid current_order))
               ]
             ()
         ; Vdom.Node.input
@@ -80,13 +102,17 @@ let yellow_orders (yellow_bid : int option) (yellow_ask : int option) =
                    | None -> "Ask")
               ; Vdom.Attr.classes [ "yellow_order" ]
               ; Vdom.Attr.type_ "number"
+              ; Vdom.Attr.on_input (fun _ current_order ->
+                  inject (`Update_yellow_ask current_order))
               ]
             ()
         ]
     ]
 ;;
 
-let blue_orders (blue_bid : int option) (blue_ask : int option) =
+let blue_orders state inject =
+  let%sub { Orders.blue_bid; blue_ask; _ } = state in
+  let%arr blue_bid and blue_ask and inject in
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "blue" ] ]
     [ Vdom.Node.img
@@ -102,6 +128,8 @@ let blue_orders (blue_bid : int option) (blue_ask : int option) =
                    | None -> "Bid")
               ; Vdom.Attr.classes [ "blue_order" ]
               ; Vdom.Attr.type_ "number"
+              ; Vdom.Attr.on_input (fun _ current_order ->
+                  inject (`Update_blue_bid current_order))
               ]
             ()
         ; Vdom.Node.input
@@ -112,13 +140,17 @@ let blue_orders (blue_bid : int option) (blue_ask : int option) =
                    | None -> "Ask")
               ; Vdom.Attr.classes [ "blue_order" ]
               ; Vdom.Attr.type_ "number"
+              ; Vdom.Attr.on_input (fun _ current_order ->
+                  inject (`Update_blue_ask current_order))
               ]
             ()
         ]
     ]
 ;;
 
-let green_orders (green_bid : int option) (green_ask : int option) =
+let green_orders state inject =
+  let%sub { Orders.green_bid; green_ask; _ } = state in
+  let%arr green_bid and green_ask and inject in
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "green" ] ]
     [ Vdom.Node.img
@@ -134,6 +166,8 @@ let green_orders (green_bid : int option) (green_ask : int option) =
                    | None -> "Bid")
               ; Vdom.Attr.classes [ "green_order" ]
               ; Vdom.Attr.type_ "number"
+              ; Vdom.Attr.on_input (fun _ current_order ->
+                  inject (`Update_green_bid current_order))
               ]
             ()
         ; Vdom.Node.input
@@ -144,105 +178,199 @@ let green_orders (green_bid : int option) (green_ask : int option) =
                    | None -> "Ask")
               ; Vdom.Attr.classes [ "green_order" ]
               ; Vdom.Attr.type_ "number"
+              ; Vdom.Attr.on_input (fun _ current_order ->
+                  inject (`Update_green_ask current_order))
               ]
             ()
         ]
     ]
 ;;
 
-(* Helpers *)
-
-let get_input_value_by_class (class_name : string) (index : int)
-  : string option
-  =
-  let open Js_of_ocaml in
-  let open Js in
-  let doc = Dom_html.document in
-  let elements = doc##getElementsByClassName (string class_name) in
-  match Js.Opt.to_option (elements##item index) with
-  | None -> None
-  | Some el ->
-    (match Js.Opt.to_option (Dom_html.CoerceTo.input el) with
-     | None -> None
-     | Some input -> Some (to_string input##.value))
-;;
-
-let get_orders_for_racer ~player_id (racer : Racer.t) : Order.t list =
-  let class_name = String.lowercase (Racer.to_string racer) ^ "_order" in
-  let bid_str = get_input_value_by_class class_name 0 in
-  let ask_str = get_input_value_by_class class_name 1 in
-  let parse_price s = Option.bind s ~f:Int.of_string_opt in
-  let bid_price = parse_price bid_str in
-  let ask_price = parse_price ask_str in
-  let make_order order_type price =
-    Order.create ~player_id ~racer ~price:(Some price) ~order_type
-  in
-  List.filter_map
-    [ Option.map bid_price ~f:(make_order Bid)
-    ; Option.map ask_price ~f:(make_order Ask)
-    ]
-    ~f:Fn.id
-;;
-
-let submit_button ~player_id ~on_submit : Vdom.Node.t =
+let submit_button inject =
+  let%arr inject in
   Vdom.Node.button
     ~attrs:
       [ Vdom.Attr.type_ "button"
       ; Vdom.Attr.classes [ "submit_orders" ]
-      ; Vdom.Attr.on_click (fun _evt ->
-          let racers = [ Racer.Red; Yellow; Blue; Green ] in
-          let all_orders =
-            List.concat_map racers ~f:(get_orders_for_racer ~player_id)
-          in
-          on_submit all_orders)
+      ; Vdom.Attr.on_click (fun _ -> (inject `Submit_bids))
       ]
     [ Vdom.Node.text "Submit Orders" ]
 ;;
 
 (* Bonsai component *)
 
-let component
-  ~player_id
-  ~my_red_bid
-  ~my_red_ask
-  ~my_blue_bid
-  ~my_blue_ask
-  ~my_yellow_bid
-  ~my_yellow_ask
-  ~my_green_bid
-  ~my_green_ask
-  =
+let component state inject =
+  let%arr red_orders = red_orders state inject
+  and yellow_orders = yellow_orders state inject
+  and blue_orders = blue_orders state inject
+  and green_orders = green_orders state inject
+  and submit_button = submit_button inject in
   Vdom.Node.div
     [ Vdom.Node.form
         ~attrs:[ Vdom.Attr.classes [ "exchange_page" ] ]
-        [ red_orders my_red_bid my_red_ask
-        ; yellow_orders my_yellow_bid my_yellow_ask
-        ; blue_orders my_blue_bid my_blue_ask
-        ; green_orders my_green_bid my_green_ask
-        ; submit_button ~player_id ~on_submit:(fun _ -> Ui_effect.Ignore)
+        [ red_orders
+        ; yellow_orders
+        ; blue_orders
+        ; green_orders
+        ; submit_button
         ]
     ]
 ;;
 
-let serve_body
-  ~player_id
-  ~my_red_bid
-  ~my_red_ask
-  ~my_blue_bid
-  ~my_blue_ask
-  ~my_yellow_bid
-  ~my_yellow_ask
-  ~my_green_bid
-  ~my_green_ask
-  =
-  component
-    ~player_id
-    ~my_red_bid
-    ~my_red_ask
-    ~my_blue_bid
-    ~my_blue_ask
-    ~my_yellow_bid
-    ~my_yellow_ask
-    ~my_green_bid
-    ~my_green_ask
+let updated_orders (me : Player.t Bonsai_web.Bonsai.t) (local_ graph) =
+  let dispatcher = Rpc_effect.Rpc.dispatcher Rpcs.Client_message.rpc graph in
+  let helper_func =
+    let%arr me and dispatcher in
+    me, dispatcher
+  in
+  let state, inject =
+    Bonsai.state_machine_with_input
+      ~default_model:(Orders.create ())
+      ~apply_action:(fun ctx input model action ->
+        match input with
+        | Bonsai.Computation_status.Inactive -> model
+        | Active ((me : Player.t), dispatcher) ->
+          (match action with
+           | `Update_red_ask order ->
+             { model with red_ask = Int.of_string_opt order }
+           | `Update_yellow_ask order ->
+             { model with yellow_ask = Int.of_string_opt order }
+           | `Update_green_ask order ->
+             { model with green_ask = Int.of_string_opt order }
+           | `Update_blue_ask order ->
+             { model with blue_ask = Int.of_string_opt order }
+           | `Update_red_bid order ->
+             { model with red_bid = Int.of_string_opt order }
+           | `Update_blue_bid order ->
+             { model with blue_bid = Int.of_string_opt order }
+           | `Update_yellow_bid order ->
+             { model with yellow_bid = Int.of_string_opt order }
+           | `Update_green_bid order ->
+             { model with green_bid = Int.of_string_opt order }
+           | `Submit_bids ->
+             let red_bid_query =
+               Rpcs.Client_message.Query.Order_placed
+                 Order.
+                   { player_id = me.id
+                   ; racer = Racer.Red
+                   ; price = model.red_bid
+                   ; order_type = Bid
+                   }
+             in
+             let red_ask_query =
+               Rpcs.Client_message.Query.Order_placed
+                 Order.
+                   { player_id = me.id
+                   ; racer = Racer.Red
+                   ; price = model.red_ask
+                   ; order_type = Ask
+                   }
+             in
+             let blue_bid_query =
+               Rpcs.Client_message.Query.Order_placed
+                 Order.
+                   { player_id = me.id
+                   ; racer = Racer.Blue
+                   ; price = model.blue_bid
+                   ; order_type = Bid
+                   }
+             in
+             let blue_ask_query =
+               Rpcs.Client_message.Query.Order_placed
+                 Order.
+                   { player_id = me.id
+                   ; racer = Racer.Blue
+                   ; price = model.blue_ask
+                   ; order_type = Ask
+                   }
+             in
+             let yellow_bid_query =
+               Rpcs.Client_message.Query.Order_placed
+                 Order.
+                   { player_id = me.id
+                   ; racer = Racer.Yellow
+                   ; price = model.yellow_bid
+                   ; order_type = Bid
+                   }
+             in
+             let yellow_ask_query =
+               Rpcs.Client_message.Query.Order_placed
+                 Order.
+                   { player_id = me.id
+                   ; racer = Racer.Yellow
+                   ; price = model.yellow_ask
+                   ; order_type = Ask
+                   }
+             in
+             let green_bid_query =
+               Rpcs.Client_message.Query.Order_placed
+                 Order.
+                   { player_id = me.id
+                   ; racer = Racer.Green
+                   ; price = model.green_bid
+                   ; order_type = Bid
+                   }
+             in
+             let green_ask_query =
+               Rpcs.Client_message.Query.Order_placed
+                 Order.
+                   { player_id = me.id
+                   ; racer = Racer.Green
+                   ; price = model.green_ask
+                   ; order_type = Ask
+                   }
+             in
+             Bonsai_web.Bonsai.Apply_action_context.schedule_event
+               ctx
+               (match%bind.Effect dispatcher red_bid_query with
+                | Ok _ -> Effect.all_unit []
+                | Error error ->
+                  Effect.of_sync_fun eprint_s [%sexp (error : Error.t)]);
+             Bonsai_web.Bonsai.Apply_action_context.schedule_event
+               ctx
+               (match%bind.Effect dispatcher red_ask_query with
+                | Ok _ -> Effect.all_unit []
+                | Error error ->
+                  Effect.of_sync_fun eprint_s [%sexp (error : Error.t)]);
+             Bonsai_web.Bonsai.Apply_action_context.schedule_event
+               ctx
+               (match%bind.Effect dispatcher yellow_bid_query with
+                | Ok _ -> Effect.all_unit []
+                | Error error ->
+                  Effect.of_sync_fun eprint_s [%sexp (error : Error.t)]);
+             Bonsai_web.Bonsai.Apply_action_context.schedule_event
+               ctx
+               (match%bind.Effect dispatcher yellow_ask_query with
+                | Ok _ -> Effect.all_unit []
+                | Error error ->
+                  Effect.of_sync_fun eprint_s [%sexp (error : Error.t)]);
+             Bonsai_web.Bonsai.Apply_action_context.schedule_event
+               ctx
+               (match%bind.Effect dispatcher blue_bid_query with
+                | Ok _ -> Effect.all_unit []
+                | Error error ->
+                  Effect.of_sync_fun eprint_s [%sexp (error : Error.t)]);
+             Bonsai_web.Bonsai.Apply_action_context.schedule_event
+               ctx
+               (match%bind.Effect dispatcher blue_ask_query with
+                | Ok _ -> Effect.all_unit []
+                | Error error ->
+                  Effect.of_sync_fun eprint_s [%sexp (error : Error.t)]);
+             Bonsai_web.Bonsai.Apply_action_context.schedule_event
+               ctx
+               (match%bind.Effect dispatcher green_bid_query with
+                | Ok _ -> Effect.all_unit []
+                | Error error ->
+                  Effect.of_sync_fun eprint_s [%sexp (error : Error.t)]);
+             Bonsai_web.Bonsai.Apply_action_context.schedule_event
+               ctx
+               (match%bind.Effect dispatcher green_ask_query with
+                | Ok _ -> Effect.all_unit []
+                | Error error ->
+                  Effect.of_sync_fun eprint_s [%sexp (error : Error.t)]);
+             model))
+      helper_func
+      graph
+  in
+  component state inject
 ;;
