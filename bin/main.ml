@@ -5,6 +5,12 @@ open Bonsai_web
 open Bonsai.Let_syntax
 open! Race_figgie
 
+type client_action =
+  | Set_my_red_bid of int
+  | Set_my_blue_ask of int
+  | Reset
+;;
+
 let buying_power bp =
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "buying_power" ] ]
@@ -31,11 +37,17 @@ let body bp =
 ;;
 
 
+<<<<<<< HEAD
 
 (* Dummy client state *)
 let dummy_client_state : Client_state.t Bonsai.t =
   Bonsai.return
     { Client_state.current_phase = Current_phase.Playing
+=======
+let dcs : Client_state.t  =
+  
+    { Client_state.current_phase = Current_phase.Enter_user
+>>>>>>> 00a05e019f11616b24493855368dcd0530b2436b
     ; all_trades =
         [ Fill.create "Preston" "Joseph" Racer.Blue 10
         ; Fill.create "Bari" "Fahim" Racer.Red 10
@@ -56,26 +68,31 @@ let dummy_client_state : Client_state.t Bonsai.t =
 ;;
 
 let apply_client_action (_ctx : (_, _) Bonsai.Apply_action_context.t)
-                        (model : Client_state.t)
+                        (model : Client_state.t )
                         (action : client_action)
   : Client_state.t =
   match action with
   | Set_my_red_bid bid ->
-      { model with my_red_bid = bid }
+      { model with Client_state.my_red_bid = Some bid }
   | Set_my_blue_ask ask ->
-      { model with my_blue_ask = ask }
-  | Reset -> dummy_client_state
+      { model with Client_state.my_blue_ask = Some  ask }
+  | Reset -> dcs
   ;;
 
 let page (local_ _graph) =
   let default_client_state, update_initial_state =
     Bonsai.state_machine
-      ~default_model:dummy_client_state
-      ~apply_action:
+      ~default_model:dcs
+      ~apply_action:apply_client_action 
+      _graph
+in
 
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 00a05e019f11616b24493855368dcd0530b2436b
   let%sub { current_phase
           ; me
           ; all_trades
