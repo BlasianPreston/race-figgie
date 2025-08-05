@@ -30,6 +30,8 @@ let body bp =
     ]
 ;;
 
+
+
 (* Dummy client state *)
 let dummy_client_state : Client_state.t Bonsai.t =
   Bonsai.return
@@ -53,8 +55,28 @@ let dummy_client_state : Client_state.t Bonsai.t =
     }
 ;;
 
-let page (client_state : Client_state.t Bonsai.t) (local_ _graph) =
-  let%sub { current_phase
+let apply_client_action (_ctx : (_, _) Bonsai.Apply_action_context.t)
+                        (model : Client_state.t)
+                        (action : client_action)
+  : Client_state.t =
+  match action with
+  | Set_my_red_bid bid ->
+      { model with my_red_bid = bid }
+  | Set_my_blue_ask ask ->
+      { model with my_blue_ask = ask }
+  | Reset -> dummy_client_state
+  ;;
+
+let page (local_ _graph) =
+  let default_client_state, update_initial_state =
+    Bonsai.state_machine
+      ~default_model:dummy_client_state
+      ~apply_action:
+
+
+
+
+  let%sub { current_phasea
           ; me
           ; all_trades
           ; my_red_bid
@@ -68,7 +90,7 @@ let page (client_state : Client_state.t Bonsai.t) (local_ _graph) =
           ; _
           }
     =
-    client_state
+    default_client_state
   in
   let%sub { id; cash; _ } = me in
   match%sub current_phase with
@@ -103,4 +125,4 @@ let page (client_state : Client_state.t Bonsai.t) (local_ _graph) =
 ;;
 
 (* Entry point *)
-let () = Bonsai_web.Start.start (fun graph -> page dummy_client_state graph)
+let () = Bonsai_web.Start.start (fun graph -> page graph) 
