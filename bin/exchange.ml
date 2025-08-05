@@ -203,22 +203,22 @@ let submit_button ~player_id ~on_submit : Vdom.Node.t =
 
 let component
   ~player_id
-  red_bid
-  red_ask
-  blue_bid
-  blue_ask
-  yellow_bid
-  yellow_ask
-  green_bid
-  green_ask
+  ~my_red_bid
+  ~my_red_ask
+  ~my_blue_bid
+  ~my_blue_ask
+  ~my_yellow_bid
+  ~my_yellow_ask
+  ~my_green_bid
+  ~my_green_ask
   =
   Vdom.Node.div
     [ Vdom.Node.form
         ~attrs:[ Vdom.Attr.classes [ "exchange_page" ] ]
-        [ red_orders red_bid red_ask
-        ; yellow_orders yellow_bid yellow_ask
-        ; blue_orders blue_bid blue_ask
-        ; green_orders green_bid green_ask
+        [ red_orders my_red_bid my_red_ask
+        ; yellow_orders my_yellow_bid my_yellow_ask
+        ; blue_orders my_blue_bid my_blue_ask
+        ; green_orders my_green_bid my_green_ask
         ; submit_button ~player_id ~on_submit:(fun _ -> Ui_effect.Ignore)
         ]
     ]
@@ -226,23 +226,23 @@ let component
 
 let serve_body
   ~player_id
-  red_bid
-  red_ask
-  blue_bid
-  blue_ask
-  yellow_bid
-  yellow_ask
-  green_bid
-  green_ask
+  ~my_red_bid
+  ~my_red_ask
+  ~my_blue_bid
+  ~my_blue_ask
+  ~my_yellow_bid
+  ~my_yellow_ask
+  ~my_green_bid
+  ~my_green_ask
   =
   component
     ~player_id
-    red_bid
-    red_ask
-    blue_bid
-    blue_ask
-    yellow_bid
-    yellow_ask
-    green_bid
-    green_ask
+    ~my_red_bid
+    ~my_red_ask
+    ~my_blue_bid
+    ~my_blue_ask
+    ~my_yellow_bid
+    ~my_yellow_ask
+    ~my_green_bid
+    ~my_green_ask
 ;;

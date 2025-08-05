@@ -89,14 +89,14 @@ let page (client_state : Client_state.t Bonsai.t) (local_ _graph) =
       [ body cash
       ; Exchange.serve_body
           ~player_id:id
-          my_red_bid
-          my_yellow_bid
-          my_blue_bid
-          my_green_bid
-          my_red_ask
-          my_yellow_ask
-          my_blue_ask
-          my_green_ask
+          ~my_red_bid
+          ~my_yellow_bid
+          ~my_blue_bid
+          ~my_green_bid
+          ~my_red_ask
+          ~my_yellow_ask
+          ~my_blue_ask
+          ~my_green_ask
       ; Trade_history.body all_trades
       ]
   | _ -> Bonsai.return {%html|<p>Waiting for others...</p>|}
