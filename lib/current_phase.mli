@@ -1,6 +1,7 @@
 open! Core
 
 type t =
+  | Enter_user
   | Waiting
   | Playing
   | End
