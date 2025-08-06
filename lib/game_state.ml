@@ -170,16 +170,29 @@ let take_money_for_pot t =
 ;;
 
 let add_order t (order : Order.t) =
+  let customer_id = order.player_id in
   let racer = order.racer in
   if Order.is_bid order
   then (
     let current_orders = Map.find t.bids racer |> Option.value ~default:[] in
-    let updated_orders = order :: current_orders in
+    let current_orders_with_previous_customer_order_removed =
+      List.filter current_orders ~f:(fun current_order ->
+        String.equal current_order.player_id customer_id |> not)
+    in
+    let updated_orders =
+      order :: current_orders_with_previous_customer_order_removed
+    in
     let updated_bids = Map.set t.bids ~key:racer ~data:updated_orders in
     { t with bids = updated_bids })
   else (
     let current_orders = Map.find t.asks racer |> Option.value ~default:[] in
-    let updated_orders = order :: current_orders in
+    let current_orders_with_previous_customer_order_removed =
+      List.filter current_orders ~f:(fun current_order ->
+        String.equal current_order.player_id customer_id |> not)
+    in
+    let updated_orders =
+      order :: current_orders_with_previous_customer_order_removed
+    in
     let updated_asks = Map.set t.asks ~key:racer ~data:updated_orders in
     { t with asks = updated_asks })
 ;;

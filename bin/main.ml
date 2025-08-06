@@ -5,5 +5,3 @@ let command_group =
     [
       ("start-server", start_server_command);
     ]
-
-let () = Command_unix.run command_group
