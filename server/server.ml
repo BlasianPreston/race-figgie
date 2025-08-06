@@ -311,12 +311,37 @@ let web_handler =
           Cohttp_static_handler.Asset.Kind.javascript
           (Cohttp_static_handler.Asset.What_to_serve.file
              ~relative_to:`Exe
-             ~path:"../bin/main.bc.js")
+             ~path:"../client/main.bc.js")
       ; Cohttp_static_handler.Asset.local
           Cohttp_static_handler.Asset.Kind.css
           (Cohttp_static_handler.Asset.What_to_serve.file
              ~relative_to:`Exe
-             ~path:"../bin/styles.css")
+             ~path:"../client/styles.css")
+      ; Cohttp_static_handler.Asset.local
+          (Cohttp_static_handler.Asset.Kind.file ~rel:"img" ~type_:"png")
+          (Cohttp_static_handler.Asset.What_to_serve.file
+             ~relative_to:`Exe
+             ~path:"../images/green_character.png")
+      ; Cohttp_static_handler.Asset.local
+          (Cohttp_static_handler.Asset.Kind.file ~rel:"img" ~type_:"png")
+          (Cohttp_static_handler.Asset.What_to_serve.file
+             ~relative_to:`Exe
+             ~path:"../images/pink_character.png")
+      ; Cohttp_static_handler.Asset.local
+          (Cohttp_static_handler.Asset.Kind.file ~rel:"img" ~type_:"png")
+          (Cohttp_static_handler.Asset.What_to_serve.file
+             ~relative_to:`Exe
+             ~path:"../images/updated_blue_character.png")
+      ; Cohttp_static_handler.Asset.local
+          (Cohttp_static_handler.Asset.Kind.file ~rel:"img" ~type_:"png")
+          (Cohttp_static_handler.Asset.What_to_serve.file
+             ~relative_to:`Exe
+             ~path:"../images/updated_yellow_character.png")
+      ; Cohttp_static_handler.Asset.local
+          (Cohttp_static_handler.Asset.Kind.file ~rel:"img" ~type_:"png")
+          (Cohttp_static_handler.Asset.What_to_serve.file
+             ~relative_to:`Exe
+             ~path:"../images/race.png")
       ]
 ;;
 
