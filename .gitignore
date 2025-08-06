@@ -4,3 +4,7 @@ client/main.bc.js
 client/*.exe
 client/*.bc.js
 client/main.exe
+bin/main.bc.js
+bin/*.exe
+bin/*.bc.js
+bin/main.exe
