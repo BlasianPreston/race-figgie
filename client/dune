@@ -12,3 +12,11 @@
  (promote (until-clean))
  (preprocess
   (pps ppx_jane js_of_ocaml-ppx bonsai.ppx_bonsai ppx_css ppx_html)))
+
+(rule
+ (target test)
+ (deps
+  (glob_files ../images/*)
+  (file styles.css))
+ (action
+  (write-file test test)))
