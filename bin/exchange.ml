@@ -192,7 +192,7 @@ let submit_button inject =
     ~attrs:
       [ Vdom.Attr.type_ "button"
       ; Vdom.Attr.classes [ "submit_orders" ]
-      ; Vdom.Attr.on_click (fun _ -> (inject `Submit_bids))
+      ; Vdom.Attr.on_click (fun _ -> inject `Submit_bids)
       ]
     [ Vdom.Node.text "Submit Orders" ]
 ;;

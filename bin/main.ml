@@ -64,7 +64,7 @@ let page (local_ graph) =
       ~apply_action:(fun ctx input model action ->
         match input with
         | Bonsai.Computation_status.Inactive -> model
-        | Active (dispatcher) ->
+        | Active dispatcher ->
           (match action with
            | `Update_username username ->
              { dcs with me = { dcs.me with id = username } }
@@ -77,7 +77,8 @@ let page (local_ graph) =
                 | Error error ->
                   Effect.of_sync_fun eprint_s [%sexp (error : Error.t)]);
              model))
-      helper_func graph
+      helper_func
+      graph
   in
   let%sub { current_phase; me; all_trades; _ } = default_client_state in
   let%sub { cash; _ } = me in
