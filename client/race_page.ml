@@ -10,11 +10,12 @@ let buying_power bp =
     ~attrs:[ Vdom.Attr.classes [ "buying_power" ] ]
     [ Vdom.Node.h2
         ~attrs:[ Vdom.Attr.classes [ "buying_power_text" ] ]
-        [ Vdom.Node.text ("Buying Power: $" ^ Int.to_string bp) ]
+        [ Vdom.Node.text ("Cash: $" ^ Int.to_string bp) ]
     ]
 ;;
 
 let positions (race_positions : (Racer.t * int * int) list) : Vdom.Node.t =
+  print_s [%sexp (race_positions : (Racer.t * int * int) list)];
   let children =
     List.concat_map race_positions ~f:(fun (racer, position, _) ->
       [ Vdom.Node.div
@@ -29,7 +30,7 @@ let positions (race_positions : (Racer.t * int * int) list) : Vdom.Node.t =
           ]
       ])
   in
-  Vdom.Node.div children
+  Vdom.Node.div ~attrs:[ Vdom.Attr.classes [ "racers_div" ] ] children
 ;;
 
 let show_holdings (holdings : Racer.t list) =
@@ -46,22 +47,26 @@ let show_holdings (holdings : Racer.t list) =
           ]
       ])
   in
-  Vdom.Node.div ~attrs:[Vdom.Attr.classes ["holdings_div"]] children
+  Vdom.Node.div ~attrs:[ Vdom.Attr.classes [ "holdings_div" ] ] children
 ;;
 
 let body (race_positions : (Racer.t * int * int) list) holdings bp =
   Vdom.Node.div
-    ~attrs:[ ]
+    ~attrs:[ Vdom.Attr.classes [ "race_page" ] ]
     [ Vdom.Node.h1
-        ~attrs:[ Vdom.Attr.classes [ "race header" ] ]
+        ~attrs:[ Vdom.Attr.classes [ "race_header" ] ]
         [ Vdom.Node.text "Race Figgie" ]
-    ; Vdom.Node.img
-        ~attrs:
-          [ Vdom.Attr.classes [ "race_img" ]
-          ; Vdom.Attr.src "../images/race.png"
-          ]
-        ()
-    ; positions race_positions; show_holdings holdings
+    ; Vdom.Node.div
+        ~attrs:[ Vdom.Attr.classes [ "image_div" ] ]
+        [ Vdom.Node.img
+            ~attrs:
+              [ Vdom.Attr.classes [ "race_img" ]
+              ; Vdom.Attr.src "../images/race.png"
+              ]
+            ()
+        ]
+    ; positions race_positions
+    ; show_holdings holdings
     ; buying_power bp
     ]
 ;;
