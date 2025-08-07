@@ -45,6 +45,7 @@ let update_state_on_trade
   ~bid_order_list
   ~(racer_traded : Racer.t)
   =
+  print_endline "\n\n\n\n Running update state \n\n\n\n";
   let updated_bid_order_list =
     remove_player_order_from_order_list
       ~player:bidder
@@ -60,6 +61,7 @@ let update_state_on_trade
     List.find_exn players_lst ~f:(fun (_, player) ->
       String.equal player.id asker)
   in
+  print_endline "so far so good";
   let _, askers_player = askers_player_record in
   let updated_asker =
     { askers_player with
@@ -68,10 +70,9 @@ let update_state_on_trade
         remove_one_racer_from_list askers_player.holdings racer_traded
     }
   in
-  let players_lst = Map.to_alist state.players in
   let bidders_player_record =
     List.find_exn players_lst ~f:(fun (_, player) ->
-      String.equal player.id asker)
+      String.equal player.id bidder)
   in
   let _, bidders_player = bidders_player_record in
   let updated_bidder =
@@ -80,28 +81,39 @@ let update_state_on_trade
     ; holdings = racer_traded :: bidders_player.holdings
     }
   in
+  if String.equal bidder asker
+  then failwith "Bidder and asker cannot be the same player!";
+  print_endline "so far so good";
   let updated_players =
     let players_lst = Map.to_alist state.players in
+    print_endline "player_lst done";
+    List.iter players_lst ~f:(fun (name, p) ->
+      Printf.printf "Player key: %s | ID: %s\n" name p.id);
+    Printf.printf "asker: %s | bidder: %s\n" asker bidder;
     Map.of_alist_exn
       (module String)
       (List.map players_lst ~f:(fun (name, p) ->
          if String.equal p.id asker
-         then asker, updated_asker
+         then name, updated_asker
          else if String.equal p.id bidder
-         then bidder, updated_bidder
+         then name, updated_bidder
          else name, p))
   in
+  print_endline "so far so good";
   (* Update the bids map *)
   let updated_bids =
-    Map.add_exn ~key:racer_traded ~data:updated_bid_order_list state.bids
+    Map.set state.bids ~key:racer_traded ~data:updated_bid_order_list
   in
-  (* Update the asks map *)
+  print_endline "bids updated!";
   let updated_asks =
-    Map.add_exn ~key:racer_traded ~data:updated_ask_order_list state.asks
+    Map.set state.asks ~key:racer_traded ~data:updated_ask_order_list
   in
+  print_endline "asks_updated!";
   let updated_fills =
     Fill.create bidder asker racer_traded trade_price :: state.filled_orders
   in
+  print_s [%sexp (updated_fills : Fill.t list)];
+  print_endline "Fills have been updated!";
   Game_state.update
     ~current_phase:state.current_phase
     ~players:updated_players
@@ -128,6 +140,10 @@ let check_for_trades_given_racer (state : Game_state.t) ~(racer : Racer.t) =
        (match best_bid >= best_ask with
         | false -> state
         | true ->
+          print_endline "\n\n\n\n\n\n\n\nTwo orders have been matched!";
+          print_endline bidder;
+          print_endline asker;
+          print_endline "Two orders have been matched!\n\n\n\n\n\n\n";
           update_state_on_trade
             state
             ~bidder

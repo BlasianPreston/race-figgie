@@ -42,8 +42,10 @@ let page_with_state (client_state : Client_state.t Bonsai.t) (local_ graph) =
   match%sub current_phase with
   | Waiting -> loading_page
   | Playing ->
-    let%sub {cash ; _} = me in
-    let%arr all_trades and exchange = Exchange.updated_orders client_state graph and cash = cash in
+    let%sub { cash; _ } = me in
+    let%arr all_trades
+    and exchange = Exchange.updated_orders client_state graph
+    and cash in
     Vdom.Node.div
       ~attrs:[ Vdom.Attr.classes [ "full_page" ] ]
       [ body cash; exchange; Trade_history.body all_trades ]
@@ -72,9 +74,10 @@ let render_game_page name (local_ graph) =
     in
     let%arr result in
     (* do something with Error types? *)
-    ignore (match result.last_error with
-    | None -> ()
-    | Some (_, err) -> print_s [%sexp (err : Error.t)]); 
+    ignore
+      (match result.last_error with
+       | None -> ()
+       | Some (_, err) -> print_s [%sexp (err : Error.t)]);
     match result.last_ok_response with
     | None -> None
     | Some (_query, resp) -> Some resp
@@ -116,7 +119,7 @@ let serve_route (local_ graph) =
              print_endline "Entering name";
              Entering_name (new_name, None)
            | `Try_to_join_game ->
-            print_s [%sexp (model : Landing_state.t)];
+             print_s [%sexp (model : Landing_state.t)];
              if String.equal "" (Landing_state.name model)
              then model
              else (
@@ -129,13 +132,13 @@ let serve_route (local_ graph) =
                  print_endline " we are dispatching";
                  match result with
                  | Error error ->
-                  print_endline "1";
+                   print_endline "1";
                    Bonsai.Apply_action_context.inject
                      ctx
                      (`Failed_join (Error.to_string_hum error))
                  | Ok resp ->
-                  print_endline "2";
-                  print_s [%sexp (resp : (string, string) result)];
+                   print_endline "2";
+                   print_s [%sexp (resp : (string, string) result)];
                    (match resp with
                     | Ok msg ->
                       if not (String.equal "Ready" msg)
@@ -153,7 +156,10 @@ let serve_route (local_ graph) =
                             dispatcher everyone_ready_query
                           in
                           print_endline "hiii ";
-                          print_s [%sexp (ready_result : ((string, string) result, Error.t) result)];
+                          print_s
+                            [%sexp
+                              (ready_result
+                               : ((string, string) result, Error.t) result)];
                           match ready_result with
                           | Error error ->
                             Bonsai.Apply_action_context.inject

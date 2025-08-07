@@ -6,7 +6,7 @@ let handle_client_requesting_client_state
   (query : Rpcs.Poll_client_state.Query.t)
   (authoritative_game_state : Game_state.t ref)
   =
-  print_s [%sexp (query : Rpcs.Poll_client_state.Query.t)];
+  (* print_s [%sexp (query : Rpcs.Poll_client_state.Query.t)]; *)
   Game_state.get_client_state_from_name !authoritative_game_state query.name
 ;;
 
@@ -241,7 +241,8 @@ let compute_round_results (game_state : Game_state.t ref) =
       player.id, { player with holdings = [] })
   in
   let updated_player_map = String.Map.of_alist_exn updated_players_assoc in
-  game_state := { !game_state with players = updated_player_map; current_phase = End }
+  game_state
+  := { !game_state with players = updated_player_map; current_phase = End }
 ;;
 
 let handle_round (game_state : Game_state.t ref) (* : unit Deferred.t *) =
@@ -249,10 +250,10 @@ let handle_round (game_state : Game_state.t ref) (* : unit Deferred.t *) =
   game_state := Game_state.add_hands_to_players reset_player_hands;
   take_money_for_pot game_state;
   print_endline "Money in pot";
-  let%bind () = wait_for_winner game_state in ();
+  let%bind () = wait_for_winner game_state in
+  ();
   Deferred.return (compute_round_results game_state)
 ;;
-
 
 let handle_new_player (game_state : Game_state.t ref) name =
   game_state := Game_state.add_player_and_possibly_add_hand !game_state name;
@@ -286,7 +287,7 @@ let handle_client_message
   (query : Rpcs.Client_message.Query.t)
   (game_state : Game_state.t ref)
   =
-  print_s [%sexp (query : Rpcs.Client_message.Query.t)];
+  (* print_s [%sexp (query : Rpcs.Client_message.Query.t)]; *)
   match query with
   | New_player name -> handle_new_player game_state name
   | Everyone_ready -> handle_everyone_ready game_state
