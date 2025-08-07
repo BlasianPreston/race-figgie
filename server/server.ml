@@ -187,7 +187,7 @@ let _check_winner (game_state : Game_state.t ref) =
 ;;
 
 let everyone_is_ready (game_state : Game_state.t ref) =
-  Map.length !game_state.players = 4
+  List.length (Map.keys !game_state.players) = 4
 ;;
 
 let start_game (game_state : Game_state.t ref) =
@@ -276,9 +276,14 @@ let handle_round (game_state : Game_state.t ref) (* : unit Deferred.t *) =
 
 let handle_new_player (game_state : Game_state.t ref) name =
   game_state := Game_state.add_player_and_possibly_add_hand !game_state name;
-  if everyone_is_ready game_state then handle_round game_state;
-  Ok "Ok"
+  if everyone_is_ready game_state then
+  Ok "Ready" else Ok "Ok"
 ;;
+
+let handle_everyone_ready (game_state : Game_state.t ref) =
+  game_state := {!game_state with current_phase = Playing};
+  handle_round game_state;
+  Ok "Ok"
 
 let handle_order_placed (game_state : Game_state.t ref) (order : Order.t) =
   game_state := Game_state.add_order !game_state order;
@@ -296,6 +301,7 @@ let handle_client_message
   =
   match query with
   | New_player name -> handle_new_player game_state name
+  | Everyone_ready -> handle_everyone_ready game_state
   | Order_placed order -> handle_order_placed game_state order
   | Order_filled fill -> handle_order_filled game_state fill
 ;;

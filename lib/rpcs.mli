@@ -5,6 +5,7 @@ module Client_message : sig
   module Query : sig
     type t =
       | New_player of string
+      | Everyone_ready
       | Order_placed of Order.t
       | Order_filled of Fill.t
     [@@deriving sexp_of, bin_io]

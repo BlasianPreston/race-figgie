@@ -19,6 +19,7 @@ let body update_join_game_state error =
               ~attrs:
                 [ Vdom.Attr.classes [ "username_input" ]
                 ; Vdom.Attr.placeholder "Enter Username"
+                ; Vdom.Attr.id "username_form"
                 ; Vdom.Attr.on_input (fun _ current_name ->
                     update_join_game_state (`Update_name current_name))
                 ; Vdom.Attr.on_keydown (fun event ->
@@ -33,6 +34,7 @@ let body update_join_game_state error =
               ~attrs:
                 [ Vdom.Attr.type_ "submit"
                 ; Vdom.Attr.classes [ "username_submit" ]
+                ; Vdom.Attr.id "username_form"
                 ; Vdom.Attr.on_click (fun _ ->
                     update_join_game_state `Try_to_join_game)
                 ]
