@@ -5,31 +5,6 @@ open Bonsai_web
 open Bonsai.Let_syntax
 open! Race_figgie
 
-let buying_power bp =
-  Vdom.Node.div
-    ~attrs:[ Vdom.Attr.classes [ "buying_power" ] ]
-    [ Vdom.Node.h2
-        ~attrs:[ Vdom.Attr.classes [ "buying_power_text" ] ]
-        [ Vdom.Node.text ("Buying Power: $" ^ Int.to_string bp) ]
-    ]
-;;
-
-let body bp =
-  Vdom.Node.div
-    ~attrs:[ Vdom.Attr.classes [ "race_column" ] ]
-    [ Vdom.Node.h1
-        ~attrs:[ Vdom.Attr.classes [ "race header" ] ]
-        [ Vdom.Node.text "Race Figgie" ]
-    ; Vdom.Node.img
-        ~attrs:
-          [ Vdom.Attr.classes [ "race_img" ]
-          ; Vdom.Attr.src "../images/race.png"
-          ]
-        ()
-    ; buying_power bp
-    ]
-;;
-
 let loading_page =
   Bonsai.return
     (Vdom.Node.div
@@ -38,15 +13,18 @@ let loading_page =
 ;;
 
 let page_with_state (client_state : Client_state.t Bonsai.t) (local_ graph) =
-  let%sub { me; current_phase; all_trades; _ } = client_state in
+  let%sub { me; current_phase; race_positions; all_trades; _ } = client_state in
   match%sub current_phase with
   | Waiting -> loading_page
   | Playing ->
     let%sub {cash ; _} = me in
-    let%arr all_trades and exchange = Exchange.updated_orders client_state graph and cash = cash in
+    
+    let%arr all_trades and exchange = Exchange.updated_orders client_state graph and cash = cash and race_positions in
+    let race = Race_page.body race_positions cash in
+    let trade_history = Trade_history.body all_trades in
     Vdom.Node.div
       ~attrs:[ Vdom.Attr.classes [ "full_page" ] ]
-      [ body cash; exchange; Trade_history.body all_trades ]
+      [ race; exchange; trade_history ]
   | _ -> loading_page
 ;;
 

@@ -15,6 +15,7 @@ type t =
   ; my_yellow_ask : int option
   ; my_blue_ask : int option
   ; my_green_ask : int option
+  ; race_positions : (Racer.t * int * int) list
   ; me : Player.t
   }
 [@@deriving sexp, bin_io, equal]
