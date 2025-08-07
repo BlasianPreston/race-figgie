@@ -273,6 +273,7 @@ let handle_everyone_ready (game_state : Game_state.t ref) =
 
 let handle_order_placed (game_state : Game_state.t ref) (order : Order.t) =
   game_state := Game_state.add_order !game_state order;
+  game_state := Trade.match_orders !game_state;
   Ok "Ok"
 ;;
 
