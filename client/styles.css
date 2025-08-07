@@ -215,3 +215,10 @@ body {
     justify-content: center;
     align-items: center;
 }
+
+.holdings_div {
+    width: 600px;
+    height: 100px;
+    display: flex;
+    justify-content: space-evenly;
+}
