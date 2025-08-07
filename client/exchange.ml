@@ -219,7 +219,7 @@ let component state inject =
 
 let updated_orders (client_state : Client_state.t Bonsai.t) (local_ graph) =
   let dispatcher = Rpc_effect.Rpc.dispatcher Rpcs.Client_message.rpc graph in
-  let%sub {me; _} = client_state in
+  let%sub { me; _ } = client_state in
   let helper_func =
     let%arr me and dispatcher in
     me, dispatcher

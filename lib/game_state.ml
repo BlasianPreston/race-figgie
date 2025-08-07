@@ -169,32 +169,47 @@ let take_money_for_pot t =
   { t with players = updated_players }
 ;;
 
+let replace_existing_customer_order
+  ~order_book
+  ~customer_id
+  ~racer
+  ~order
+  =
+  let current_orders =
+    Map.find order_book racer |> Option.value ~default:[]
+  in
+  let current_orders_with_previous_customer_order_removed =
+    List.filter current_orders ~f:(fun (current_order : Order.t) ->
+      String.equal current_order.player_id customer_id |> not)
+  in
+  let updated_orders =
+    order :: current_orders_with_previous_customer_order_removed
+  in
+  Map.set order_book ~key:racer ~data:updated_orders
+;;
+
 let add_order t (order : Order.t) =
   let customer_id = order.player_id in
   let racer = order.racer in
-  if Order.is_bid order
-  then (
-    let current_orders = Map.find t.bids racer |> Option.value ~default:[] in
-    let current_orders_with_previous_customer_order_removed =
-      List.filter current_orders ~f:(fun current_order ->
-        String.equal current_order.player_id customer_id |> not)
+  match Order.is_bid order with
+  | true ->
+    let updated_bids =
+      replace_existing_customer_order
+        ~order_book:t.bids
+        ~customer_id
+        ~racer
+        ~order
     in
-    let updated_orders =
-      order :: current_orders_with_previous_customer_order_removed
+    { t with bids = updated_bids }
+  | false ->
+    let updated_asks =
+      replace_existing_customer_order
+        ~order_book:t.asks
+        ~customer_id
+        ~racer
+        ~order
     in
-    let updated_bids = Map.set t.bids ~key:racer ~data:updated_orders in
-    { t with bids = updated_bids })
-  else (
-    let current_orders = Map.find t.asks racer |> Option.value ~default:[] in
-    let current_orders_with_previous_customer_order_removed =
-      List.filter current_orders ~f:(fun current_order ->
-        String.equal current_order.player_id customer_id |> not)
-    in
-    let updated_orders =
-      order :: current_orders_with_previous_customer_order_removed
-    in
-    let updated_asks = Map.set t.asks ~key:racer ~data:updated_orders in
-    { t with asks = updated_asks })
+    { t with asks = updated_asks }
 ;;
 
 let add_fill t (fill : Fill.t) =

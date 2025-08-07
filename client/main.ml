@@ -30,15 +30,24 @@ let body bp =
     ]
 ;;
 
-let loading_page = Vdom.Node.div ~attrs:[Vdom.Attr.classes ["loading"]] [Vdom.Node.p [Vdom.Node.text "Loading..."]]
-
+let loading_page =
+  Vdom.Node.div
+    ~attrs:[ Vdom.Attr.classes [ "loading" ] ]
+    [ Vdom.Node.p [ Vdom.Node.text "Loading..." ] ]
+;;
 
 let page_with_state (client_state : Client_state.t Bonsai.t) (local_ graph) =
   let%arr exchange = Exchange.updated_orders client_state graph in
   Vdom.Node.div
-      ~attrs:[ Vdom.Attr.classes [ "full_page" ] ]
-      [ body 69; exchange; Trade_history.body [Fill.create "Preston" "Joseph" Racer.Blue 10
-      ; Fill.create "Bari" "Fahim" Racer.Red 10] ]
+    ~attrs:[ Vdom.Attr.classes [ "full_page" ] ]
+    [ body 69
+    ; exchange
+    ; Trade_history.body
+        [ Fill.create "Preston" "Joseph" Racer.Blue 10
+        ; Fill.create "Bari" "Fahim" Racer.Red 10
+        ]
+    ]
+;;
 
 let render_game_page name (local_ graph) =
   let client_state : Client_state.t option Bonsai.t =
@@ -77,6 +86,7 @@ let render_landing_page update_join_game_state error =
 ;;
 
 let serve_route (local_ graph) =
+  let () = print_endline "Rendering serve_route"
   let dispatcher =
     Rpc_effect.Rpc.dispatcher
       Rpcs.Client_message.rpc
@@ -100,33 +110,35 @@ let serve_route (local_ graph) =
              Entering_name (Landing_state.name model, Some error)
            | `Update_name new_name -> Entering_name (new_name, None)
            | `Try_to_join_game ->
-              if String.equal "" (Landing_state.name model) then model else (
-             let player_name_query =
-               Rpcs.Client_message.Query.New_player
-                 (Landing_state.name model)
-             in
-             let my_new_effect =
-               let%bind.Effect result = dispatcher player_name_query in
-               match result with
-               | Error error ->
-                 Bonsai.Apply_action_context.inject
-                   ctx
-                   (`Failed_join (Error.to_string_hum error))
-               | Ok resp ->
-                 (match resp with
-                  | Ok _ ->
-                    Bonsai.Apply_action_context.inject
-                      ctx
-                      (`Ack_join (Landing_state.name model))
-                  | Error error_message ->
-                    Bonsai.Apply_action_context.inject
-                      ctx
-                      (`Failed_join error_message))
-             in
-             Bonsai_web.Bonsai.Apply_action_context.schedule_event
-               ctx
-               my_new_effect;
-             model))
+             if String.equal "" (Landing_state.name model)
+             then model
+             else (
+               let player_name_query =
+                 Rpcs.Client_message.Query.New_player
+                   (Landing_state.name model)
+               in
+               let my_new_effect =
+                 let%bind.Effect result = dispatcher player_name_query in
+                 match result with
+                 | Error error ->
+                   Bonsai.Apply_action_context.inject
+                     ctx
+                     (`Failed_join (Error.to_string_hum error))
+                 | Ok resp ->
+                   (match resp with
+                    | Ok _ ->
+                      Bonsai.Apply_action_context.inject
+                        ctx
+                        (`Ack_join (Landing_state.name model))
+                    | Error error_message ->
+                      Bonsai.Apply_action_context.inject
+                        ctx
+                        (`Failed_join error_message))
+               in
+               Bonsai_web.Bonsai.Apply_action_context.schedule_event
+                 ctx
+                 my_new_effect;
+               model))
         | Inactive -> model)
       dispatcher
       graph
