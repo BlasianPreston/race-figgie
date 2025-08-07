@@ -144,6 +144,7 @@ let get_client_state_from_name (t : t) (name : string) : Client_state.t =
     then None
     else (List.hd_exn my_green_ask_lst).price
   in
+  let race_positions = t.race_positions in
   { current_phase
   ; all_trades
   ; players
@@ -158,6 +159,7 @@ let get_client_state_from_name (t : t) (name : string) : Client_state.t =
   ; my_blue_ask
   ; my_green_bid
   ; my_green_ask
+  ; race_positions
   }
 ;;
 
