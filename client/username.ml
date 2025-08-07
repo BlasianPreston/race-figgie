@@ -14,7 +14,13 @@ let body update_join_game_state error =
           ~attrs:[ Vdom.Attr.classes [ "username_title" ] ]
           [ Vdom.Node.text "Race Figgie" ]
       ; Vdom.Node.form
-          ~attrs:[ Vdom.Attr.classes [ "username_form" ] ]
+          ~attrs:[ Vdom.Attr.classes [ "username_form" ] ;
+          Vdom.Attr.on_submit (fun _ -> (
+            let%bind.Effect () = Effect.Prevent_default in
+            update_join_game_state `Try_to_join_game
+          ))
+          
+          ]
           [ Vdom.Node.input
               ~attrs:
                 [ Vdom.Attr.classes [ "username_input" ]
@@ -22,12 +28,13 @@ let body update_join_game_state error =
                 ; Vdom.Attr.id "username_form"
                 ; Vdom.Attr.on_input (fun _ current_name ->
                     update_join_game_state (`Update_name current_name))
-                ; Vdom.Attr.on_keydown (fun event ->
+                ; 
+                (* Vdom.Attr.on_keydown (fun event ->
                     match
                       Js_of_ocaml.Dom_html.Keyboard_code.of_event event
                     with
                     | Enter -> update_join_game_state `Try_to_join_game
-                    | _ -> Effect.all_unit [])
+                    | _ -> Effect.all_unit []) *)
                 ]
               ()
           ; Vdom.Node.button

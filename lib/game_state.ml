@@ -56,9 +56,9 @@ let get_client_state_from_name (t : t) (name : string) : Client_state.t =
     List.filter
       [ Racer.Red; Racer.Yellow; Racer.Blue; Racer.Green ]
       ~f:(fun color ->
-        if Int.equal (Map.find_exn frequency_map color) highest_freq
-        then true
-        else false)
+        match Map.find frequency_map color with
+        | None -> false
+        | Some num -> if Int.equal highest_freq num then true else false)
   in
   let red_bids = Map.find t.bids Racer.Red |> Option.value ~default:[] in
   let my_red_bid_lst =
@@ -169,12 +169,7 @@ let take_money_for_pot t =
   { t with players = updated_players }
 ;;
 
-let replace_existing_customer_order
-  ~order_book
-  ~customer_id
-  ~racer
-  ~order
-  =
+let replace_existing_customer_order ~order_book ~customer_id ~racer ~order =
   let current_orders =
     Map.find order_book racer |> Option.value ~default:[]
   in

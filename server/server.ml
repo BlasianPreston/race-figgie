@@ -6,14 +6,8 @@ let handle_client_requesting_client_state
   (query : Rpcs.Poll_client_state.Query.t)
   (authoritative_game_state : Game_state.t ref)
   =
+  print_s [%sexp (query : Rpcs.Poll_client_state.Query.t)];
   Game_state.get_client_state_from_name !authoritative_game_state query.name
-;;
-
-let change_game_phase
-  (game_state : Game_state.t ref)
-  (phase : Current_phase.t)
-  =
-  game_state := { !game_state with current_phase = phase }
 ;;
 
 let _reset (game_state : Game_state.t ref) =
@@ -190,30 +184,20 @@ let everyone_is_ready (game_state : Game_state.t ref) =
   List.length (Map.keys !game_state.players) = 4
 ;;
 
-let start_game (game_state : Game_state.t ref) =
-  change_game_phase game_state Current_phase.Playing
-;;
-
 let take_money_for_pot (game_state : Game_state.t ref) =
   game_state := Game_state.take_money_for_pot !game_state
 ;;
 
-let wait_for_winner (game_state : Game_state.t ref) =
-  let rec loop passes =
-    match !game_state.winner with
-    | Some w -> game_state := { !game_state with winner = Some w }
-    | None ->
-      game_state := Game_state.update_positions !game_state;
-      if passes = 5
-      then (
-        game_state := Game_state.update_velocities !game_state;
-        game_state := match_orders !game_state;
-        Core_unix.sleep 1;
-        loop 1)
-      else Core_unix.sleep 1;
-      loop (passes + 1)
-  in
-  loop 1
+let rec wait_for_winner (game_state : Game_state.t ref) : unit Deferred.t =
+  match !game_state.winner with
+  | Some _ -> return ()
+  | None ->
+    print_endline "waiting for winner";
+    game_state := Game_state.update_positions !game_state;
+    game_state := Game_state.update_velocities !game_state;
+    game_state := match_orders !game_state;
+    let%bind () = Async.after (Time_float.Span.of_sec 1.0) in
+    wait_for_winner game_state
 ;;
 
 let compute_round_results (game_state : Game_state.t ref) =
@@ -257,33 +241,35 @@ let compute_round_results (game_state : Game_state.t ref) =
       player.id, { player with holdings = [] })
   in
   let updated_player_map = String.Map.of_alist_exn updated_players_assoc in
-  game_state := { !game_state with players = updated_player_map }
-;;
-
-let end_game (game_state : Game_state.t ref) =
-  game_state := { !game_state with current_phase = Current_phase.End }
+  game_state := { !game_state with players = updated_player_map; current_phase = End }
 ;;
 
 let handle_round (game_state : Game_state.t ref) (* : unit Deferred.t *) =
   let reset_player_hands = Game_state.reset_hands !game_state in
   game_state := Game_state.add_hands_to_players reset_player_hands;
   take_money_for_pot game_state;
-  start_game game_state;
-  wait_for_winner game_state;
-  compute_round_results game_state;
-  end_game game_state
+  print_endline "Money in pot";
+  let%bind () = wait_for_winner game_state in ();
+  Deferred.return (compute_round_results game_state)
 ;;
+
 
 let handle_new_player (game_state : Game_state.t ref) name =
   game_state := Game_state.add_player_and_possibly_add_hand !game_state name;
-  if everyone_is_ready game_state then
-  Ok "Ready" else Ok "Ok"
+  game_state := { !game_state with current_phase = Waiting };
+  if everyone_is_ready game_state
+  then (
+    game_state := { !game_state with current_phase = Playing };
+    Ok "Ready")
+  else Ok "Ok"
 ;;
 
 let handle_everyone_ready (game_state : Game_state.t ref) =
-  game_state := {!game_state with current_phase = Playing};
-  handle_round game_state;
+  game_state := { !game_state with current_phase = Playing };
+  print_endline "Reached";
+  handle_round game_state |> don't_wait_for;
   Ok "Ok"
+;;
 
 let handle_order_placed (game_state : Game_state.t ref) (order : Order.t) =
   game_state := Game_state.add_order !game_state order;
@@ -299,6 +285,7 @@ let handle_client_message
   (query : Rpcs.Client_message.Query.t)
   (game_state : Game_state.t ref)
   =
+  print_s [%sexp (query : Rpcs.Client_message.Query.t)];
   match query with
   | New_player name -> handle_new_player game_state name
   | Everyone_ready -> handle_everyone_ready game_state
