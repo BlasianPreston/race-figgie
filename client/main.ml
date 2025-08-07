@@ -38,14 +38,15 @@ let loading_page =
 ;;
 
 let page_with_state (client_state : Client_state.t Bonsai.t) (local_ graph) =
-  let%sub { current_phase; all_trades; _ } = client_state in
+  let%sub { me; current_phase; all_trades; _ } = client_state in
   match%sub current_phase with
   | Waiting -> loading_page
   | Playing ->
-    let%arr all_trades and exchange = Exchange.updated_orders client_state graph in
+    let%sub {cash ; _} = me in
+    let%arr all_trades and exchange = Exchange.updated_orders client_state graph and cash = cash in
     Vdom.Node.div
       ~attrs:[ Vdom.Attr.classes [ "full_page" ] ]
-      [ body 69; exchange; Trade_history.body all_trades ]
+      [ body cash; exchange; Trade_history.body all_trades ]
   | _ -> loading_page
 ;;
 
