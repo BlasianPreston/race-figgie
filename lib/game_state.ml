@@ -185,6 +185,11 @@ let replace_existing_customer_order ~order_book ~customer_id ~racer ~order =
   Map.set order_book ~key:racer ~data:updated_orders
 ;;
 
+let check_if_asker_has_racer_in_inventory (state : t) ~asker ~racer =
+  let { Player.holdings; _ } = Map.find_exn state.players asker in
+  List.exists holdings ~f:(fun racer_held -> Racer.equal racer_held racer)
+;;
+
 let add_order t (order : Order.t) =
   let customer_id = order.player_id in
   let racer = order.racer in
@@ -199,14 +204,19 @@ let add_order t (order : Order.t) =
     in
     { t with bids = updated_bids }
   | false ->
-    let updated_asks =
-      replace_existing_customer_order
-        ~order_book:t.asks
-        ~customer_id
-        ~racer
-        ~order
-    in
-    { t with asks = updated_asks }
+    (match
+       check_if_asker_has_racer_in_inventory t ~asker:customer_id ~racer
+     with
+     | true ->
+       let updated_asks =
+         replace_existing_customer_order
+           ~order_book:t.asks
+           ~customer_id
+           ~racer
+           ~order
+       in
+       { t with asks = updated_asks }
+     | false -> t)
 ;;
 
 let add_fill t (fill : Fill.t) =
