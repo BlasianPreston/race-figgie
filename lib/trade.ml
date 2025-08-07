@@ -45,7 +45,6 @@ let update_state_on_trade
   ~bid_order_list
   ~(racer_traded : Racer.t)
   =
-  print_endline "\n\n\n\n Running update state \n\n\n\n";
   let updated_bid_order_list =
     remove_player_order_from_order_list
       ~player:bidder
@@ -61,7 +60,6 @@ let update_state_on_trade
     List.find_exn players_lst ~f:(fun (_, player) ->
       String.equal player.id asker)
   in
-  print_endline "so far so good";
   let _, askers_player = askers_player_record in
   let updated_asker =
     { askers_player with
@@ -81,15 +79,8 @@ let update_state_on_trade
     ; holdings = racer_traded :: bidders_player.holdings
     }
   in
-  if String.equal bidder asker
-  then failwith "Bidder and asker cannot be the same player!";
-  print_endline "so far so good";
   let updated_players =
     let players_lst = Map.to_alist state.players in
-    print_endline "player_lst done";
-    List.iter players_lst ~f:(fun (name, p) ->
-      Printf.printf "Player key: %s | ID: %s\n" name p.id);
-    Printf.printf "asker: %s | bidder: %s\n" asker bidder;
     Map.of_alist_exn
       (module String)
       (List.map players_lst ~f:(fun (name, p) ->
@@ -140,10 +131,6 @@ let check_for_trades_given_racer (state : Game_state.t) ~(racer : Racer.t) =
        (match best_bid >= best_ask with
         | false -> state
         | true ->
-          print_endline "\n\n\n\n\n\n\n\nTwo orders have been matched!";
-          print_endline bidder;
-          print_endline asker;
-          print_endline "Two orders have been matched!\n\n\n\n\n\n\n";
           update_state_on_trade
             state
             ~bidder
