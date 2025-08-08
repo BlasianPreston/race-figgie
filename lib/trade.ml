@@ -45,6 +45,7 @@ let update_state_on_trade
   ~bid_order_list
   ~(racer_traded : Racer.t)
   =
+  ignore bid;
   let updated_bid_order_list =
     remove_player_order_from_order_list
       ~player:bidder
@@ -75,7 +76,7 @@ let update_state_on_trade
   let _, bidders_player = bidders_player_record in
   let updated_bidder =
     { bidders_player with
-      cash = bidders_player.cash + (bid - trade_price)
+      cash = bidders_player.cash - trade_price
     ; holdings = racer_traded :: bidders_player.holdings
     }
   in
@@ -149,4 +150,24 @@ let match_orders (state : Game_state.t) =
   |> check_for_trades_given_racer ~racer:Green
   |> check_for_trades_given_racer ~racer:Yellow
   |> check_for_trades_given_racer ~racer:Blue
+;;
+
+let get_current_best_prices_for_racer (state : Game_state.t) ~racer =
+  let racer_bids = Map.find state.bids racer in
+  let racer_asks = Map.find state.asks racer in
+  let best_bid =
+    match racer_bids with
+    | None -> "X"
+    | Some bid_list ->
+      let bid_opt = get_best_bid_order ~bid_order_list:bid_list in
+      (match bid_opt with None -> "X" | Some (bid, _) -> Int.to_string bid)
+  in
+  let best_ask =
+    match racer_asks with
+    | None -> "X"
+    | Some ask_list ->
+      let ask_opt = get_best_ask_order ~ask_order_list:ask_list in
+      (match ask_opt with None -> "X" | Some (ask, _) -> Int.to_string ask)
+  in
+  best_bid, best_ask
 ;;

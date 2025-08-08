@@ -10,7 +10,7 @@ let buying_power bp =
     ~attrs:[ Vdom.Attr.classes [ "buying_power" ] ]
     [ Vdom.Node.h2
         ~attrs:[ Vdom.Attr.classes [ "buying_power_text" ] ]
-        [ Vdom.Node.text ("Buying Power: $" ^ Int.to_string bp) ]
+        [ Vdom.Node.text ("Cash: $" ^ Int.to_string bp) ]
     ]
 ;;
 
@@ -46,12 +46,12 @@ let show_holdings (holdings : Racer.t list) =
           ]
       ])
   in
-  Vdom.Node.div ~attrs:[Vdom.Attr.classes ["holdings_div"]] children
+  Vdom.Node.div ~attrs:[ Vdom.Attr.classes [ "holdings_div" ] ] children
 ;;
 
 let body (race_positions : (Racer.t * int * int) list) holdings bp =
   Vdom.Node.div
-    ~attrs:[ ]
+    ~attrs:[]
     [ Vdom.Node.h1
         ~attrs:[ Vdom.Attr.classes [ "race header" ] ]
         [ Vdom.Node.text "Race Figgie" ]
@@ -61,7 +61,8 @@ let body (race_positions : (Racer.t * int * int) list) holdings bp =
           ; Vdom.Attr.src "../images/race.png"
           ]
         ()
-    ; positions race_positions; show_holdings holdings
+    ; positions race_positions
+    ; show_holdings holdings
     ; buying_power bp
     ]
 ;;
