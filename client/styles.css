@@ -279,23 +279,32 @@ body {
 }
 
 .player_results_div {
-    display: flex;
-    justify-content: space-evenly;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     font-size: 25px;
 }
 
 .racer_best_order {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     justify-content: space-evenly;
+}
+
+.best_orders_div {
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
+    justify-content: space-evenly;
+    margin: 0rem 0.5rem 0rem 0.5rem;
 }
 
 .player_results_div {
     height: 100vh;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-evenly;
+    margin: 0rem 0.5rem 0rem 0.5rem;
 }
 
 .orders_img {
@@ -313,4 +322,8 @@ body {
     grid-template-columns: 1fr;
     align-items: center;
     justify-content: center;
+}
+
+.player_orders {
+    display: grid;
 }

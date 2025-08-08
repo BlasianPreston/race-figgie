@@ -12,3 +12,14 @@ let create name = { id = name; holdings = []; cash = 400 }
 let create_with_holdings id (holdings : Racer.t list) =
   { id; holdings; cash = 400 }
 ;;
+
+let richest_player_id (players : t list) : string =
+  match players with
+  | [] -> ""
+  | hd :: tl ->
+    let richest =
+      List.fold_left tl ~init:hd ~f:(fun acc player ->
+        if player.cash > acc.cash then player else acc)
+    in
+    richest.id
+;;

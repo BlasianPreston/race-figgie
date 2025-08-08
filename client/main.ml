@@ -48,7 +48,10 @@ let page_with_state (client_state : Client_state.t Bonsai.t) (local_ graph) =
       match pot_winner with Some win -> win | None -> ""
     in
     let racer = match winner with Some r -> r | None -> Racer.Red in
-    let results_page = Results_page.body me.id winner_string racer players in
+    let cash_winner = Player.richest_player_id players in
+    let results_page =
+      Results_page.body me.id winner_string racer cash_winner players
+    in
     results_page
   | _ -> loading_page
 ;;

@@ -9,3 +9,4 @@ type t =
 
 val create : string -> t
 val create_with_holdings : string -> Racer.t list -> t
+val richest_player_id : t list -> string
