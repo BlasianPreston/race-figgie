@@ -12,6 +12,7 @@ type t =
   ; filled_orders : Fill.t list
   ; race_positions : (Racer.t * position * velocity) list
   ; winner : Racer.t option
+  ; pot_winner : string option
   }
 
 let empty () =
@@ -22,6 +23,7 @@ let empty () =
   ; filled_orders = []
   ; race_positions = []
   ; winner = None
+  ; pot_winner = None
   }
 ;;
 
@@ -315,6 +317,7 @@ let add_hands_to_players t =
   ; filled_orders = t.filled_orders
   ; race_positions = t.race_positions
   ; winner = None
+  ; pot_winner = None
   }
 ;;
 
@@ -356,6 +359,7 @@ let create
     ; filled_orders
     ; race_positions
     ; winner
+    ; pot_winner = None
     }
   in
   add_hands_to_players state
@@ -377,6 +381,7 @@ let update
   ; filled_orders
   ; race_positions
   ; winner
+  ; pot_winner = None
   }
 ;;
 
@@ -401,6 +406,7 @@ let update_positions t =
   ; filled_orders = t.filled_orders
   ; race_positions
   ; winner = t.winner
+  ; pot_winner = t.pot_winner
   }
 ;;
 
@@ -424,6 +430,7 @@ let update_velocities t =
   ; filled_orders = t.filled_orders
   ; race_positions
   ; winner = t.winner
+  ;pot_winner = t.pot_winner
   }
 ;;
 
