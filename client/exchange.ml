@@ -37,6 +37,12 @@ end
 let red_orders (state : Orders.t Bonsai.t) inject =
   let%sub { Orders.red_bid; red_ask; _ } = state in
   let%arr red_bid and red_ask and inject in
+  let red_bid_display =  (match red_bid with
+                   | Some bid -> Int.to_string bid
+                   | None -> "Bid") in
+  let red_ask_display = (match red_ask with
+                   | Some ask -> Int.to_string ask
+                   | None -> "Ask") in
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "red" ] ]
     [ Vdom.Node.img
@@ -47,11 +53,10 @@ let red_orders (state : Orders.t Bonsai.t) inject =
         [ Vdom.Node.input
             ~attrs:
               [ Vdom.Attr.placeholder
-                  (match red_bid with
-                   | Some bid -> Int.to_string bid
-                   | None -> "Bid")
+                  red_bid_display
               ; Vdom.Attr.classes [ "red_order" ]
               ; Vdom.Attr.type_ "number"
+              ; Vdom.Attr.string_property "value" red_bid_display
               ; Vdom.Attr.on_input (fun _ current_order ->
                   inject (`Update_red_bid current_order))
               ]
@@ -59,11 +64,10 @@ let red_orders (state : Orders.t Bonsai.t) inject =
         ; Vdom.Node.input
             ~attrs:
               [ Vdom.Attr.placeholder
-                  (match red_ask with
-                   | Some ask -> Int.to_string ask
-                   | None -> "Ask")
+                  red_ask_display
               ; Vdom.Attr.classes [ "red_order" ]
               ; Vdom.Attr.type_ "number"
+              ; Vdom.Attr.string_property "value" red_ask_display
               ; Vdom.Attr.on_input (fun _ current_order ->
                   inject (`Update_red_ask current_order))
               ]
@@ -75,6 +79,12 @@ let red_orders (state : Orders.t Bonsai.t) inject =
 let yellow_orders state inject =
   let%sub { Orders.yellow_bid; yellow_ask; _ } = state in
   let%arr yellow_bid and yellow_ask and inject in
+  let yellow_bid_display =  (match yellow_bid with
+                   | Some bid -> Int.to_string bid
+                   | None -> "Bid") in
+  let yellow_ask_display = (match yellow_ask with
+                   | Some ask -> Int.to_string ask
+                   | None -> "Ask") in
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "yellow" ] ]
     [ Vdom.Node.img
@@ -85,11 +95,10 @@ let yellow_orders state inject =
         [ Vdom.Node.input
             ~attrs:
               [ Vdom.Attr.placeholder
-                  (match yellow_bid with
-                   | Some bid -> Int.to_string bid
-                   | None -> "Bid")
+                  yellow_bid_display
               ; Vdom.Attr.classes [ "yellow_order" ]
               ; Vdom.Attr.type_ "number"
+              ; Vdom.Attr.string_property "value" yellow_bid_display
               ; Vdom.Attr.on_input (fun _ current_order ->
                   inject (`Update_yellow_bid current_order))
               ]
@@ -97,11 +106,10 @@ let yellow_orders state inject =
         ; Vdom.Node.input
             ~attrs:
               [ Vdom.Attr.placeholder
-                  (match yellow_ask with
-                   | Some ask -> Int.to_string ask
-                   | None -> "Ask")
+                  yellow_ask_display
               ; Vdom.Attr.classes [ "yellow_order" ]
               ; Vdom.Attr.type_ "number"
+              ; Vdom.Attr.string_property "value" yellow_ask_display
               ; Vdom.Attr.on_input (fun _ current_order ->
                   inject (`Update_yellow_ask current_order))
               ]
@@ -113,6 +121,12 @@ let yellow_orders state inject =
 let blue_orders state inject =
   let%sub { Orders.blue_bid; blue_ask; _ } = state in
   let%arr blue_bid and blue_ask and inject in
+  let blue_bid_display =  (match blue_bid with
+                   | Some bid -> Int.to_string bid
+                   | None -> "Bid") in
+  let blue_ask_display = (match blue_ask with
+                   | Some ask -> Int.to_string ask
+                   | None -> "Ask") in
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "blue" ] ]
     [ Vdom.Node.img
@@ -123,11 +137,10 @@ let blue_orders state inject =
         [ Vdom.Node.input
             ~attrs:
               [ Vdom.Attr.placeholder
-                  (match blue_bid with
-                   | Some bid -> Int.to_string bid
-                   | None -> "Bid")
+                  blue_bid_display
               ; Vdom.Attr.classes [ "blue_order" ]
               ; Vdom.Attr.type_ "number"
+              ; Vdom.Attr.string_property "value" blue_bid_display
               ; Vdom.Attr.on_input (fun _ current_order ->
                   inject (`Update_blue_bid current_order))
               ]
@@ -135,11 +148,10 @@ let blue_orders state inject =
         ; Vdom.Node.input
             ~attrs:
               [ Vdom.Attr.placeholder
-                  (match blue_ask with
-                   | Some ask -> Int.to_string ask
-                   | None -> "Ask")
+                  blue_ask_display
               ; Vdom.Attr.classes [ "blue_order" ]
               ; Vdom.Attr.type_ "number"
+              ; Vdom.Attr.string_property "value" blue_ask_display
               ; Vdom.Attr.on_input (fun _ current_order ->
                   inject (`Update_blue_ask current_order))
               ]
@@ -151,6 +163,12 @@ let blue_orders state inject =
 let green_orders state inject =
   let%sub { Orders.green_bid; green_ask; _ } = state in
   let%arr green_bid and green_ask and inject in
+  let green_bid_display =  (match green_bid with
+                   | Some bid -> Int.to_string bid
+                   | None -> "Bid") in
+  let green_ask_display = (match green_ask with
+                   | Some ask -> Int.to_string ask
+                   | None -> "Ask") in
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "green" ] ]
     [ Vdom.Node.img
@@ -161,10 +179,9 @@ let green_orders state inject =
         [ Vdom.Node.input
             ~attrs:
               [ Vdom.Attr.placeholder
-                  (match green_bid with
-                   | Some bid -> Int.to_string bid
-                   | None -> "Bid")
+                 green_bid_display
               ; Vdom.Attr.classes [ "green_order" ]
+              ; Vdom.Attr.string_property "value" green_bid_display
               ; Vdom.Attr.type_ "number"
               ; Vdom.Attr.on_input (fun _ current_order ->
                   inject (`Update_green_bid current_order))
@@ -173,11 +190,10 @@ let green_orders state inject =
         ; Vdom.Node.input
             ~attrs:
               [ Vdom.Attr.placeholder
-                  (match green_ask with
-                   | Some ask -> Int.to_string ask
-                   | None -> "Ask")
+                  green_ask_display
               ; Vdom.Attr.classes [ "green_order" ]
               ; Vdom.Attr.type_ "number"
+              ; Vdom.Attr.string_property "value" green_ask_display
               ; Vdom.Attr.on_input (fun _ current_order ->
                   inject (`Update_green_ask current_order))
               ]
@@ -369,7 +385,7 @@ let updated_orders (client_state : Client_state.t Bonsai.t) (local_ graph) =
                 | Ok _ -> Effect.all_unit []
                 | Error error ->
                   Effect.of_sync_fun eprint_s [%sexp (error : Error.t)]);
-             model))
+              Orders.create ()))
       helper_func
       graph
   in
