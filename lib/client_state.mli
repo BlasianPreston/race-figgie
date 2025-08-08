@@ -18,5 +18,6 @@ type t =
   ; me : Player.t
   ; winner : Racer.t option
   ; pot_winner : string option
+  ; best_orders : Racer.t * (string * string) list
   }
 [@@deriving sexp, bin_io, equal]

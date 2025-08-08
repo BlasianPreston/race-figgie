@@ -6,4 +6,4 @@ val match_orders : Game_state.t -> Game_state.t
 
 val get_best_bids_and_asks
   :  Game_state.t
-  -> (Racer.t, string * string, Racer.comparator_witness) Map_intf.Map.t
+  -> Racer.t * (string * string) list
