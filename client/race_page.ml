@@ -15,7 +15,6 @@ let buying_power bp =
 ;;
 
 let positions (race_positions : (Racer.t * int * int) list) : Vdom.Node.t =
-  print_s [%sexp (race_positions : (Racer.t * int * int) list)];
   let children =
     List.concat_map race_positions ~f:(fun (racer, position, _) ->
       [ Vdom.Node.div

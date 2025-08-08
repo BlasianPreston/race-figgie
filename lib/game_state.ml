@@ -144,7 +144,7 @@ let get_client_state_from_name (t : t) (name : string) : Client_state.t =
     then None
     else (List.hd_exn my_green_ask_lst).price
   in
-  let race_positions = t.race_positions in
+  let race_positions = List.filter t.race_positions ~f:(fun (racer, _, _) -> if (List.mem shown_racers racer ~equal:Racer.equal) then true else false) in
   { current_phase
   ; all_trades
   ; players

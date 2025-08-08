@@ -5,11 +5,11 @@ open Bonsai_web
 open Bonsai.Let_syntax
 open! Race_figgie
 
-let loading_page =
+let loading_page  =
   Bonsai.return
     (Vdom.Node.div
        ~attrs:[ Vdom.Attr.classes [ "loading" ] ]
-       [ Vdom.Node.p [ Vdom.Node.text "Loading..." ] ])
+       [ Vdom.Node.p [ Vdom.Node.text "Waiting for Players..." ] ])
 ;;
 
 let page_with_state (client_state : Client_state.t Bonsai.t) (local_ graph) =
@@ -182,4 +182,6 @@ let serve_route (local_ graph) =
     render_landing_page update_join_game_state error
 ;;
 
-let () = Bonsai_web.Start.start serve_route
+let () =
+let _ = serve_route in
+Bonsai_web.Start.start (Results_page.body "Preston" "Joseph" Racer.Red [Player.create "Preston"; Player.create "Joseph"])

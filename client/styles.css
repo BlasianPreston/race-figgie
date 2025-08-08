@@ -211,9 +211,11 @@ body {
 }
 
 .loading {
+    display: flex;
     height: 100vh;
     justify-content: center;
     align-items: center;
+    font-size: 40px;
 }
 
 .holdings_div {
@@ -246,4 +248,35 @@ body {
     align-items: center;
     justify-content: center;
     width: 100%;
+}
+
+.results_page {
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-content: center;
+    align-items: center;
+}
+
+.winner_results {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    font-size: 50px;
+}
+
+.pot_winner {
+    text-align: center;
+}
+
+.winner_img {
+    width: 80px;
+    height: auto;
+}
+
+.player_results_div {
+    display: flex;
+    justify-content: space-evenly;
+    font-size: 28px;
 }
