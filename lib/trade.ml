@@ -171,3 +171,17 @@ let get_current_best_prices_for_racer (state : Game_state.t) ~racer =
   in
   best_bid, best_ask
 ;;
+
+let get_best_bids_and_asks state =
+  let best_red = get_current_best_prices_for_racer state ~racer:Red in
+  let best_yellow = get_current_best_prices_for_racer state ~racer:Yellow in
+  let best_green = get_current_best_prices_for_racer state ~racer:Green in
+  let best_blue = get_current_best_prices_for_racer state ~racer:Blue in
+  Map.of_alist_exn
+    (module Racer)
+    [ Racer.Red, best_red
+    ; Racer.Yellow, best_yellow
+    ; Racer.Blue, best_blue
+    ; Racer.Green, best_green
+    ]
+;;

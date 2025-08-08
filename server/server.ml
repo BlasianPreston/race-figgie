@@ -229,7 +229,11 @@ let compute_round_results (game_state : Game_state.t ref) =
   in
   let updated_player_map = String.Map.of_alist_exn updated_players_assoc in
   game_state
-  := { !game_state with players = updated_player_map; current_phase = End ; pot_winner = Some winner_id}
+  := { !game_state with
+       players = updated_player_map
+     ; current_phase = End
+     ; pot_winner = Some winner_id
+     }
 ;;
 
 let handle_round (game_state : Game_state.t ref) (* : unit Deferred.t *) =

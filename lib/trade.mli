@@ -4,7 +4,6 @@ val get_best_bid_order : bid_order_list:Order.t list -> (int * string) option
 val get_best_ask_order : ask_order_list:Order.t list -> (int * string) option
 val match_orders : Game_state.t -> Game_state.t
 
-val get_current_best_prices_for_racer
+val get_best_bids_and_asks
   :  Game_state.t
-  -> racer:Racer.t
-  -> string * string
+  -> (Racer.t, string * string, Racer.comparator_witness) Map_intf.Map.t
