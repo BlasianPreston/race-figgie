@@ -5,7 +5,7 @@ open Bonsai_web
 open Bonsai.Let_syntax
 open! Race_figgie
 
-let loading_page  =
+let loading_page =
   Bonsai.return
     (Vdom.Node.div
        ~attrs:[ Vdom.Attr.classes [ "loading" ] ]
@@ -13,7 +13,16 @@ let loading_page  =
 ;;
 
 let page_with_state (client_state : Client_state.t Bonsai.t) (local_ graph) =
-  let%sub { me; current_phase; race_positions; all_trades; _ } =
+  let%sub { me
+          ; winner
+          ; pot_winner
+          ; players
+          ; current_phase
+          ; race_positions
+          ; all_trades
+          ; _
+          }
+    =
     client_state
   in
   match%sub current_phase with
@@ -30,6 +39,14 @@ let page_with_state (client_state : Client_state.t Bonsai.t) (local_ graph) =
     Vdom.Node.div
       ~attrs:[ Vdom.Attr.classes [ "full_page" ] ]
       [ race; exchange; trade_history ]
+  | End ->
+    let%arr winner and pot_winner and players and me in
+    let winner_string =
+      match pot_winner with Some win -> win | None -> ""
+    in
+    let racer = match winner with Some r -> r | None -> Racer.Red in
+    let results_page = Results_page.body me.id winner_string racer players in
+    results_page
   | _ -> loading_page
 ;;
 
@@ -182,6 +199,4 @@ let serve_route (local_ graph) =
     render_landing_page update_join_game_state error
 ;;
 
-let () =
-let _ = serve_route in
-Bonsai_web.Start.start (Results_page.body "Preston" "Joseph" Racer.Red [Player.create "Preston"; Player.create "Joseph"])
+let () = Bonsai_web.Start.start serve_route

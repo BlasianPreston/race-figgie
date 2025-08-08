@@ -29,15 +29,16 @@ let players_view (players : Player.t list) ~(me : string) ~(winner : string)
             ~attrs:[ Vdom.Attr.style name_style ]
             [ Vdom.Node.text player.id; crown ]
         ; Vdom.Node.p
+            ~attrs:[ Vdom.Attr.style name_style ]
             [ Vdom.Node.text ("Cash: " ^ Int.to_string player.cash) ]
         ])
   in
-  Vdom.Node.div ~attrs:[ Vdom.Attr.classes [ "player_results_div" ] ] children
+  Vdom.Node.div
+    ~attrs:[ Vdom.Attr.classes [ "player_results_div" ] ]
+    children
 ;;
 
-let body me winner winning_racer players (local_ graph) =
-  let _ = graph in
-  Bonsai.return (
+let body me winner winning_racer players =
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "results_page" ] ]
     [ Vdom.Node.div
@@ -59,5 +60,5 @@ let body me winner winning_racer players (local_ graph) =
             [ Vdom.Node.text ("Winner of Pot is: " ^ winner ^ "!") ]
         ]
     ; players_view ~me ~winner players
-    ])
+    ]
 ;;

@@ -17,5 +17,7 @@ type t =
   ; my_green_ask : int option
   ; race_positions : (Racer.t * int * int) list
   ; me : Player.t
+  ; winner : Racer.t option
+  ; pot_winner : string option
   }
 [@@deriving sexp, bin_io, equal]

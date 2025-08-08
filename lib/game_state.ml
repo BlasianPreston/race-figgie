@@ -147,6 +147,8 @@ let get_client_state_from_name (t : t) (name : string) : Client_state.t =
     else (List.hd_exn my_green_ask_lst).price
   in
   let race_positions = List.filter t.race_positions ~f:(fun (racer, _, _) -> if (List.mem shown_racers racer ~equal:Racer.equal) then true else false) in
+  let winner = t.winner in
+  let pot_winner = t.pot_winner in
   { current_phase
   ; all_trades
   ; players
@@ -162,6 +164,8 @@ let get_client_state_from_name (t : t) (name : string) : Client_state.t =
   ; my_green_bid
   ; my_green_ask
   ; race_positions
+  ; winner
+  ; pot_winner
   }
 ;;
 
@@ -277,7 +281,7 @@ let check_for_winner t =
   let racers = t.race_positions in
   let filtered_lst =
     List.filter racers ~f:(fun (_, position, _) ->
-      if position > 500 then true else false)
+      if position > 1000 then true else false)
   in
   match List.is_empty filtered_lst with
   | true -> t
