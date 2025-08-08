@@ -27,6 +27,50 @@ let empty () =
   }
 ;;
 
+let get_best_bid_order ~(bid_order_list : Order.t list) =
+  List.filter_map bid_order_list ~f:(fun { player_id; price; _ } ->
+    Option.map price ~f:(fun p -> p, player_id))
+  |> List.max_elt ~compare:(fun (p1, _) (p2, _) -> Int.compare p1 p2)
+;;
+
+let get_best_ask_order ~(ask_order_list : Order.t list) =
+  List.filter_map ask_order_list ~f:(fun { player_id; price; _ } ->
+    Option.map price ~f:(fun p -> p, player_id))
+  |> List.min_elt ~compare:(fun (p1, _) (p2, _) -> Int.compare p1 p2)
+;;
+
+let get_current_best_prices_for_racer (t : t) ~racer =
+  let racer_bids = Map.find t.bids racer in
+  let racer_asks = Map.find t.asks racer in
+  let best_bid =
+    match racer_bids with
+    | None -> "X"
+    | Some bid_list ->
+      let bid_opt = get_best_bid_order ~bid_order_list:bid_list in
+      (match bid_opt with None -> "X" | Some (bid, _) -> Int.to_string bid)
+  in
+  let best_ask =
+    match racer_asks with
+    | None -> "X"
+    | Some ask_list ->
+      let ask_opt = get_best_ask_order ~ask_order_list:ask_list in
+      (match ask_opt with None -> "X" | Some (ask, _) -> Int.to_string ask)
+  in
+  best_bid, best_ask
+;;
+
+let get_best_bids_and_asks state =
+  let best_red = get_current_best_prices_for_racer state ~racer:Red in
+  let best_yellow = get_current_best_prices_for_racer state ~racer:Yellow in
+  let best_green = get_current_best_prices_for_racer state ~racer:Green in
+  let best_blue = get_current_best_prices_for_racer state ~racer:Blue in
+    [ Racer.Red, best_red
+    ; Racer.Yellow, best_yellow
+    ; Racer.Blue, best_blue
+    ; Racer.Green, best_green
+    ]
+;;
+
 let racer_frequency_map (lst : 'a list) : ('a, int, _) Map.t =
   List.fold
     lst
