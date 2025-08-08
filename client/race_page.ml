@@ -29,7 +29,9 @@ let positions (race_positions : (Racer.t * int * int) list) : Vdom.Node.t =
           ]
       ])
   in
-  Vdom.Node.div ~attrs:[ Vdom.Attr.classes [ "racers_div" ] ] children
+  Vdom.Node.div
+    ~attrs:[ Vdom.Attr.classes [ "racers_div" ] ]
+    ([ Vdom.Node.h2 [ Vdom.Node.text "Race Standings:" ] ] @ children)
 ;;
 
 let show_holdings (holdings : Racer.t list) =
@@ -46,7 +48,13 @@ let show_holdings (holdings : Racer.t list) =
           ]
       ])
   in
-  Vdom.Node.div ~attrs:[ Vdom.Attr.classes [ "holdings_div" ] ] children
+  Vdom.Node.div
+    ~attrs:[ Vdom.Attr.classes [ "holdings_wrapper_div" ] ]
+    (Vdom.Node.h3 [ Vdom.Node.text "Your Holdings" ]
+     :: [ Vdom.Node.div
+            ~attrs:[ Vdom.Attr.classes [ "holdings_div" ] ]
+            children
+        ])
 ;;
 
 let body (race_positions : (Racer.t * int * int) list) holdings bp =

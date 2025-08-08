@@ -84,7 +84,7 @@ body {
     font-family:  'Jersey 10';
     font-size: 36px;
     height: 100px;
-    width: 600px;
+    width: 550px;
     align-items: center;
     justify-content: center;
     margin-top: 0.5rem;
@@ -96,6 +96,7 @@ body {
     border-radius: 25px;
     padding: 20px;
     margin-bottom: 20px;
+    width: 500px;
 }
 
 .trade_img {
@@ -151,23 +152,25 @@ body {
 }
 
 .race_img {
-    max-width: 600px;
+    max-width: 400px;
 }
 
 .buying_power {
     background: #3E69E8;
     border-radius: 25px;
     padding: 20px;
-    width: 600px;
+    width: 400px;
     height: 100px;
     text-align: center;
     justify-content: center;
+    align-items: center;
     margin-bottom : 1rem;
+    font-size: 30px;
 }
 
 .full_page {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     justify-content: center;
 }
 
@@ -219,14 +222,14 @@ body {
 }
 
 .holdings_div {
-    width: 600px;
+    width: 400px;
     height: 100px;
     display: flex;
     justify-content: space-evenly;
 }
 
 .racers_div {
-    width: 600px;
+    width: 400px;
     height: 100px;
     display: flex;
     justify-content: space-evenly;
@@ -278,5 +281,36 @@ body {
 .player_results_div {
     display: flex;
     justify-content: space-evenly;
-    font-size: 28px;
+    font-size: 25px;
+}
+
+.racer_best_order {
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-content: space-evenly;
+}
+
+.player_results_div {
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    justify-content: center;
+}
+
+.orders_img {
+    width: 125px;
+    height: auto;
+}
+
+.exchange_img {
+    width: 150px;
+    height: auto;
+}
+
+.holdings_wrapper_div {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
+    justify-content: center;
 }

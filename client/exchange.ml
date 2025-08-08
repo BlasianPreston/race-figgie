@@ -40,7 +40,7 @@ let red_orders (state : Orders.t Bonsai.t) inject =
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "red" ] ]
     [ Vdom.Node.img
-        ~attrs:[ Vdom.Attr.src "../images/pink_character.png" ]
+        ~attrs:[ Vdom.Attr.src "../images/pink_character.png"; Vdom.Attr.classes ["exchange_img"] ]
         ()
     ; Vdom.Node.div
         ~attrs:[ Vdom.Attr.classes [ "orders" ] ]
@@ -78,7 +78,7 @@ let yellow_orders state inject =
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "yellow" ] ]
     [ Vdom.Node.img
-        ~attrs:[ Vdom.Attr.src "../images/updated_yellow_character.png" ]
+        ~attrs:[ Vdom.Attr.src "../images/updated_yellow_character.png"; Vdom.Attr.classes ["exchange_img"] ]
         ()
     ; Vdom.Node.div
         ~attrs:[ Vdom.Attr.classes [ "orders" ] ]
@@ -116,7 +116,7 @@ let blue_orders state inject =
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "blue" ] ]
     [ Vdom.Node.img
-        ~attrs:[ Vdom.Attr.src "../images/updated_blue_character.png" ]
+        ~attrs:[ Vdom.Attr.src "../images/updated_blue_character.png"; Vdom.Attr.classes ["exchange_img"] ]
         ()
     ; Vdom.Node.div
         ~attrs:[ Vdom.Attr.classes [ "orders" ] ]
@@ -154,7 +154,7 @@ let green_orders state inject =
   Vdom.Node.div
     ~attrs:[ Vdom.Attr.classes [ "green" ] ]
     [ Vdom.Node.img
-        ~attrs:[ Vdom.Attr.src "../images/green_character.png" ]
+        ~attrs:[ Vdom.Attr.src "../images/green_character.png"; Vdom.Attr.classes ["exchange_img"]  ]
         ()
     ; Vdom.Node.div
         ~attrs:[ Vdom.Attr.classes [ "orders" ] ]

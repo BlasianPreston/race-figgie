@@ -20,6 +20,7 @@ let page_with_state (client_state : Client_state.t Bonsai.t) (local_ graph) =
           ; current_phase
           ; race_positions
           ; all_trades
+          ; best_orders
           ; _
           }
     =
@@ -33,12 +34,14 @@ let page_with_state (client_state : Client_state.t Bonsai.t) (local_ graph) =
     and exchange = Exchange.updated_orders client_state graph
     and holdings
     and cash
+    and best_orders
     and race_positions in
     let race = Race_page.body race_positions holdings cash in
     let trade_history = Trade_history.body all_trades in
+    let orders = Best_orders.body best_orders in
     Vdom.Node.div
       ~attrs:[ Vdom.Attr.classes [ "full_page" ] ]
-      [ race; exchange; trade_history ]
+      [ race; exchange; trade_history; orders ]
   | End ->
     let%arr winner and pot_winner and players and me in
     let winner_string =
