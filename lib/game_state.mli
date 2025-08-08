@@ -11,6 +11,7 @@ type t =
   ; filled_orders : Fill.t list
   ; race_positions : (Racer.t * position * velocity) list
   ; winner : Racer.t option
+  ; pot_winner : string option
   }
 
 val create
