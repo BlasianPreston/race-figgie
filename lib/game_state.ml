@@ -271,6 +271,20 @@ let distribute lst (n : int) =
   split [] [] lst chunk_size
 ;;
 
+let check_for_winner t =
+  let racers = t.race_positions in
+  let filtered_lst =
+    List.filter racers ~f:(fun (_, position, _) ->
+      if position > 500 then true else false)
+  in
+  match List.is_empty filtered_lst with
+  | true -> t
+  | false ->
+    let winner_triple = List.hd_exn filtered_lst in
+    (match winner_triple with
+     | winner, _, _ -> { t with winner = Some winner })
+;;
+
 let add_hands_to_players t =
   let players = t.players in
   let deck =
@@ -379,6 +393,7 @@ let update_positions t =
           else racer, position + velocity, velocity)
       positions
   in
+  print_s [%sexp (race_positions : (Racer.t * int * int) list)];
   { current_phase = t.current_phase
   ; players = t.players
   ; bids = t.bids

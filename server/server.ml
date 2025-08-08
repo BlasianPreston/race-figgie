@@ -166,20 +166,6 @@ let match_orders (state : Game_state.t) =
   |> check_for_trades_given_racer ~racer:Blue
 ;;
 
-let _check_winner (game_state : Game_state.t ref) =
-  let state = !game_state in
-  let racers = state.race_positions in
-  let winning_racer =
-    List.filter racers ~f:(fun (_, _, distance) ->
-      if distance >= 500 then true else false)
-  in
-  match List.is_empty winning_racer with
-  | true -> ()
-  | false ->
-    (match List.hd_exn winning_racer with
-     | racer, _, _ -> game_state := Game_state.set_winner state (Some racer))
-;;
-
 let everyone_is_ready (game_state : Game_state.t ref) =
   List.length (Map.keys !game_state.players) = 4
 ;;
@@ -195,6 +181,7 @@ let rec wait_for_winner (game_state : Game_state.t ref) : unit Deferred.t =
     print_endline "waiting for winner";
     game_state := Game_state.update_positions !game_state;
     game_state := Game_state.update_velocities !game_state;
+    game_state := Game_state.check_for_winner !game_state;
     game_state := match_orders !game_state;
     let%bind () = Async.after (Time_float.Span.of_sec 1.0) in
     wait_for_winner game_state
@@ -250,6 +237,7 @@ let handle_round (game_state : Game_state.t ref) (* : unit Deferred.t *) =
   game_state := Game_state.add_hands_to_players reset_player_hands;
   take_money_for_pot game_state;
   print_endline "Money in pot";
+  game_state := Game_state.initialize_racers !game_state;
   let%bind () = wait_for_winner game_state in
   ();
   Deferred.return (compute_round_results game_state)

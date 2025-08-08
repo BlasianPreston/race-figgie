@@ -222,3 +222,28 @@ body {
     display: flex;
     justify-content: space-evenly;
 }
+
+.racers_div {
+    width: 600px;
+    height: 100px;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.race_page {
+    align-items: center;
+    justify-content: center;
+}
+
+.race_header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image_div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
